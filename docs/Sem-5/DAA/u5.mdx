@@ -6,3 +6,1047 @@ sidebar_position: 5
 :::info[TITLE]
 ## Exploring Graphs
 :::
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## 1. Introduction to Graphs
+
+### 1.1 Overview and Key Terminology
+A **graph** is a versatile non-linear data structure used to model pairwise relationships between objects.
+- **Node / Vertex**: A fundamental unit or discrete entity representing an object (e.g., city, router, computer, person).
+- **Edge / Arc / Link**: A connection or relationship between two vertices.
+- **Adjacent Vertices**: Two vertices are adjacent if they are directly connected by an edge.
+- **Degree of a Vertex**:
+  - In an undirected graph: The total number of edges incident to the vertex.
+  - In a directed graph:
+    - **In-degree**: Number of incoming edges arriving at the vertex.
+    - **Out-degree**: Number of outgoing edges departing from the vertex.
+- **Path**: A sequence of alternating vertices and edges connecting a start vertex to an end vertex.
+- **Cycle**: A path where the starting vertex and ending vertex are identical, with no other vertices repeated.
+
+### 1.2 Mathematical Definition of Graphs
+A graph $G$ is formally defined as an ordered pair:
+
+$$
+G = \langle N, A \rangle
+$$
+
+Where:
+- $N$ is a **non-empty set** called the set of nodes (points, vertices):
+  $$
+  N = \{v_1, v_2, \dots, v_n\}
+  $$
+- $A$ is a set of **edges** (links, arcs):
+  $$
+  A = \{e_1, e_2, \dots, e_m\}
+  $$
+- A mapping function exists from the set of edges $A$ to pairs of elements of $N$.
+
+```mermaid
+graph LR
+    A((A)) --- B((B))
+    B((B)) --- C((C))
+    C((C)) --- D((D))
+    D((D)) --- E((E))
+    C((C)) --- F((F))
+    E((E)) --- F((F))
+    A((A)) --- D((D))
+```
+
+## 2. Graph Types and Representations
+
+### 2.1 Directed Graph (Digraph)
+- A graph in which **every edge is directed** (assigned a specific one-way orientation).
+- Each edge is represented by an **ordered pair** $(u, v)$, indicating a one-way path directed from vertex $u$ to vertex $v$.
+- $u$ is the initial node (source / predecessor), and $v$ is the terminal node (target / successor).
+
+### 2.2 Undirected Graph
+- A graph in which **every edge is bidirectional** (undirected).
+- Each edge is represented by an **unordered pair** $\{u, v\}$, meaning traversal is permitted freely in both directions: $u \to v$ and $v \to u$.
+
+```mermaid
+graph LR
+    subgraph Directed Graph
+        D1((1)) --> D2((2))
+        D2((2)) --> D3((3))
+        D3((3)) --> D4((4))
+        D4((4)) --> D1((1))
+    end
+    subgraph Undirected Graph
+        U1((1)) --- U2((2))
+        U2((2)) --- U3((3))
+        U3((3)) --- U4((4))
+        U4((4)) --- U1((1))
+    end
+```
+
+### 2.3 Graph Storage Representations
+Graphs are typically implemented in memory using one of two standard data structures:
+
+| Criterion | Adjacency Matrix | Adjacency List |
+| :--- | :--- | :--- |
+| **Data Structure** | 2D Array of size $\|V\| \times \|V\|$ | Array/Vector of Lists of size $\|V\|$ |
+| **Space Complexity** | $\Theta(V^2)$ | $\Theta(V + E)$ |
+| **Edge Lookup $(u, v)$** | $O(1)$ | $O(\text{deg}(u))$ |
+| **Iterate over Neighbors** | $O(V)$ | $O(\text{deg}(u))$ |
+| **Best Suited For** | Dense graphs ($E \approx V^2$) | Sparse graphs ($E \ll V^2$) |
+
+## 3. Traversing Graphs vs Trees
+
+### 3.1 Tree Traversal Techniques
+A tree is a special, hierarchical form of a connected, acyclic undirected graph with a single root. Standard systematic tree traversals include:
+
+```mermaid
+graph TD
+    Root((Root)) --> Left((Left))
+    Root((Root)) --> Right((Right))
+```
+
+#### 3.1.1 Preorder Traversal
+1. Visit the **root**.
+2. Traverse the **left subtree** in preorder.
+3. Traverse the **right subtree** in preorder.
+- **Rule Order**: `Root -> Left -> Right`
+
+#### 3.1.2 Inorder Traversal
+1. Traverse the **left subtree** in inorder.
+2. Visit the **root**.
+3. Traverse the **right subtree** in inorder.
+- **Rule Order**: `Left -> Root -> Right`
+
+#### 3.1.3 Postorder Traversal
+1. Traverse the **left subtree** in postorder.
+2. Traverse the **right subtree** in postorder.
+3. Visit the **root**.
+- **Rule Order**: `Left -> Right -> Root`
+
+### 3.2 Transition from Tree Traversal to Graph Traversal
+Traversing general graphs requires additional considerations compared to trees:
+1. **Cycles and Infinite Loops**: Graphs can have cycles; a node can point back to an ancestor. A `mark[v]` (visited) table or boolean flag is mandatory to prevent infinite loops.
+2. **Disconnected Components**: A tree is always connected and accessible from its root; a graph may contain multiple isolated subgraphs. The outer loop must iterate through every vertex $v \in N$ to ensure complete coverage.
+3. **No Inherent Root**: Unlike trees, any vertex $v \in N$ can serve as an arbitrary starting point for graph traversal.
+
+## 4. Depth First Search (DFS)
+
+### 4.1 Concept and Core Mechanism
+**Depth First Search (DFS)** explores as deeply as possible along each branch before backtracking.
+
+:::tip[Core Traversal Rules]
+1. Select any node $v \in N$ as the starting point and mark it as **visited**.
+2. Select an **unvisited adjacent node** of the current node. Make it the new starting point and mark it as visited (recursive step).
+3. If the current node has **no unvisited adjacent nodes**, backtrack to its parent node and continue searching.
+4. When all nodes adjacent to $v$ are marked, the search starting at $v$ finishes.
+5. If unvisited nodes remain in $G$, choose any unvisited node and repeat the procedure.
+:::
+
+```mermaid
+graph TD
+    1((1)) --- 2((2))
+    1((1)) --- 3((3))
+    1((1)) --- 4((4))
+    2((2)) --- 5((5))
+    2((2)) --- 6((6))
+    3((3)) --- 6((6))
+    4((4)) --- 7((7))
+    4((4)) --- 8((8))
+    7((7)) --- 8((8))
+```
+
+### 4.2 DFS Algorithm Pseudocode
+
+```text showLineNumbers
+procedure dfsearch(G)
+    for each v in N 
+        do mark[v] <- not-visited
+    for each v in N 
+        do if mark[v] != visited 
+            then dfs(v)
+
+procedure dfs(v)
+    {Node v has not previously been visited}
+    mark[v] <- visited
+    for each node w adjacent to v 
+        do if mark[w] != visited 
+            then dfs(w)
+```
+
+### 4.3 Step-by-Step Execution and Trace Example
+Tracing the 8-node graph shown above starting at node `1`:
+
+| Step | Action | Node Visited / Calling State | Backtrack / Neighbor Note |
+| :---: | :--- | :--- | :--- |
+| **1** | `dfs(1)` | **1** | Initial call; selects adjacent node 2 |
+| **2** | `dfs(2)` | **2** | Recursive call; selects adjacent node 3 |
+| **3** | `dfs(3)` | **3** | Recursive call; selects adjacent node 6 |
+| **4** | `dfs(6)` | **6** | Recursive call; selects unvisited neighbor 5 (via 2) |
+| **5** | `dfs(5)` | **5** | Recursive call; **progress is blocked** (no unvisited neighbors) |
+| -- | Backtrack | Returns up to node 1 | Nodes 2, 3, 5, 6 are already marked visited |
+| **6** | `dfs(4)` | **4** | Node 4 is an unvisited neighbor of node 1 |
+| **7** | `dfs(7)` | **7** | Recursive call; selects adjacent node 8 |
+| **8** | `dfs(8)` | **8** | Recursive call; all neighbors (4, 7) already visited |
+| **9** | Terminate | Done | There are no more unvisited nodes left in the graph |
+
+- **Final Visited Sequence**: `1 -> 2 -> 3 -> 6 -> 5 -> 4 -> 7 -> 8`
+
+### 4.4 Complexity and Properties
+- **Time Complexity**:
+  - **Adjacency List**: $O(V + E)$ (each vertex and edge is examined at most twice in undirected graphs).
+  - **Adjacency Matrix**: $O(V^2)$ (scanning row for each vertex requires $O(V)$ operations).
+- **Space Complexity**: $O(V)$ auxiliary space for the recursion call stack and the `mark[]` array.
+
+### 4.5 Implementation
+
+<Tabs>
+  <TabItem value="cpp" label="C++">
+    ```cpp showLineNumbers
+    #include <iostream>
+    #include <vector>
+    using namespace std;
+
+    void dfs(int v, const vector<vector<int>>& adj, vector<bool>& visited) {
+        visited[v] = true;
+        cout << v << " ";
+
+        for (int neighbor : adj[v]) {
+            if (!visited[neighbor]) {
+                dfs(neighbor, adj, visited);
+            }
+        }
+    }
+
+    void dfsearch(int n, const vector<vector<int>>& adj) {
+        vector<bool> visited(n + 1, false);
+        for (int v = 1; v <= n; v++) {
+            if (!visited[v]) {
+                dfs(v, adj, visited);
+            }
+        }
+        cout << "\n";
+    }
+    ```
+  </TabItem>
+  <TabItem value="py" label="Python">
+    ```python showLineNumbers
+    def dfs(v, adj, visited):
+        visited[v] = True
+        print(v, end=" ")
+        for neighbor in adj[v]:
+            if not visited[neighbor]:
+                dfs(neighbor, adj, visited)
+
+    def dfsearch(num_nodes, adj):
+        visited = [False] * (num_nodes + 1)
+        for v in range(1, num_nodes + 1):
+            if not visited[v]:
+                dfs(v, adj, visited)
+        print()
+    ```
+  </TabItem>
+  <TabItem value="java" label="Java" default>
+    ```java showLineNumbers
+    import java.util.*;
+
+    public class DFSGraph {
+        public static void dfs(int v, List<List<Integer>> adj, boolean[] visited) {
+            visited[v] = true;
+            System.out.print(v + " ");
+
+            for (int neighbor : adj.get(v)) {
+                if (!visited[neighbor]) {
+                    dfs(neighbor, adj, visited);
+                }
+            }
+        }
+
+        public static void dfsearch(int n, List<List<Integer>> adj) {
+            boolean[] visited = new boolean[n + 1];
+            for (int v = 1; v <= n; v++) {
+                if (!visited[v]) {
+                    dfs(v, adj, visited);
+                }
+            }
+            System.out.println();
+        }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## 5. Breadth First Search (BFS)
+
+### 5.1 Concept and Queue Mechanism
+**Breadth First Search (BFS)** explores a graph level by level (layer by layer), visiting all neighbors of a node before moving to vertices at the next depth level. It utilizes a **First-In, First-Out (FIFO) Queue**.
+
+:::tip[Core Traversal Rules]
+1. Select any node $v \in N$ as the starting point and mark it as **visited**.
+2. **Enqueue** visited node $v$ into queue $Q$.
+3. While queue $Q$ is not empty:
+   - **Dequeue** node $u$ from the front of $Q$.
+   - Find all **unvisited adjacent nodes** of $u$, mark them as visited, and enqueue them into $Q$.
+4. If any nodes remain unvisited, restart BFS on the next unvisited vertex.
+:::
+
+### 5.2 BFS Algorithm Pseudocode
+
+```text showLineNumbers
+procedure bfs(v)
+    Q <- empty-queue
+    mark[v] <- visited
+    enqueue v into Q
+    while Q is not empty 
+    do u <- first(Q)
+        dequeue u from Q
+        for each node w adjacent to u 
+            do if mark[w] != visited 
+                then mark[w] <- visited
+                     enqueue w into Q
+
+procedure search(G)
+    for each v in N 
+        do mark[v] <- not visited
+    for each v in N 
+        do if mark[v] != visited 
+            then bfs(v)
+```
+
+### 5.3 Step-by-Step Execution and Trace Example
+Tracing BFS on the same 8-node graph starting from node `1`:
+
+| Step | Action | Dequeued Node | Unvisited Adjacent Nodes Enqueued | Queue State ($Q$) |
+| :---: | :--- | :---: | :--- | :--- |
+| **0** | Start | - | Mark 1 visited, Enqueue 1 | `[1]` |
+| **1** | Dequeue & Explore | **1** | Neighbors 2, 3, 4 marked visited and enqueued | `[2, 3, 4]` |
+| **2** | Dequeue & Explore | **2** | Neighbors 5, 6 marked visited and enqueued | `[3, 4, 5, 6]` |
+| **3** | Dequeue & Explore | **3** | Neighbor 6 is already visited; none added | `[4, 5, 6]` |
+| **4** | Dequeue & Explore | **4** | Neighbors 7, 8 marked visited and enqueued | `[5, 6, 7, 8]` |
+| **5** | Dequeue & Explore | **5** | No unvisited neighbors | `[6, 7, 8]` |
+| **6** | Dequeue & Explore | **6** | No unvisited neighbors | `[7, 8]` |
+| **7** | Dequeue & Explore | **7** | Neighbor 8 already visited | `[8]` |
+| **8** | Dequeue & Explore | **8** | No unvisited neighbors | `[]` (Empty, finishes) |
+
+- **Final Visited Sequence**: `1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8`
+
+### 5.4 Complexity and Properties
+- **Time Complexity**:
+  - **Adjacency List**: $O(V + E)$
+  - **Adjacency Matrix**: $O(V^2)$
+- **Space Complexity**: $O(V)$ for the queue $Q$ and visited lookup array.
+- **Shortest Path Property**: In an unweighted graph, BFS is guaranteed to discover the shortest path (minimum edge count) from the start node to all other reachable nodes.
+
+### 5.5 Implementation
+
+<Tabs>
+  <TabItem value="cpp" label="C++">
+    ```cpp showLineNumbers
+    #include <iostream>
+    #include <vector>
+    #include <queue>
+    using namespace std;
+
+    void bfs(int start, const vector<vector<int>>& adj, vector<bool>& visited) {
+        queue<int> q;
+        visited[start] = true;
+        q.push(start);
+
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            cout << u << " ";
+
+            for (int w : adj[u]) {
+                if (!visited[w]) {
+                    visited[w] = true;
+                    q.push(w);
+                }
+            }
+        }
+    }
+
+    void search(int n, const vector<vector<int>>& adj) {
+        vector<bool> visited(n + 1, false);
+        for (int v = 1; v <= n; v++) {
+            if (!visited[v]) {
+                bfs(v, adj, visited);
+            }
+        }
+        cout << "\n";
+    }
+    ```
+  </TabItem>
+  <TabItem value="py" label="Python">
+    ```python showLineNumbers
+    from collections import deque
+
+    def bfs(start, adj, visited):
+        q = deque([start])
+        visited[start] = True
+
+        while q:
+            u = q.popleft()
+            print(u, end=" ")
+            for w in adj[u]:
+                if not visited[w]:
+                    visited[w] = True
+                    q.append(w)
+
+    def search(num_nodes, adj):
+        visited = [False] * (num_nodes + 1)
+        for v in range(1, num_nodes + 1):
+            if not visited[v]:
+                bfs(v, adj, visited)
+        print()
+    ```
+  </TabItem>
+  <TabItem value="java" label="Java" default>
+    ```java showLineNumbers
+    import java.util.*;
+
+    public class BFSGraph {
+        public static void bfs(int start, List<List<Integer>> adj, boolean[] visited) {
+            Queue<Integer> q = new LinkedList<>();
+            visited[start] = true;
+            q.add(start);
+
+            while (!q.isEmpty()) {
+                int u = q.poll();
+                System.out.print(u + " ");
+
+                for (int w : adj.get(u)) {
+                    if (!visited[w]) {
+                        visited[w] = true;
+                        q.add(w);
+                    }
+                }
+            }
+        }
+
+        public static void search(int n, List<List<Integer>> adj) {
+            boolean[] visited = new boolean[n + 1];
+            for (int v = 1; v <= n; v++) {
+                if (!visited[v]) {
+                    bfs(v, adj, visited);
+                }
+            }
+            System.out.println();
+        }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## 6. Graph Traversal Comparison: DFS vs BFS
+
+### 6.1 Comparative Walkthrough Example
+Consider the 6-vertex graph below:
+
+```mermaid
+graph TD
+    A((A)) --- B((B))
+    A((A)) --- C((C))
+    B((B)) --- D((D))
+    C((C)) --- D((D))
+    C((C)) --- E((E))
+    C((C)) --- F((F))
+    E((E)) --- F((F))
+```
+
+Starting from vertex `A` and ordering adjacent nodes alphabetically:
+- **DFS Traversal Order**: `A -> B -> D -> C -> E -> F`
+  - Explores branch: $A \to B \to D \to C \to E \to F$ to maximum depth.
+- **BFS Traversal Order**: `A -> B -> C -> D -> E -> F`
+  - Level 0: $A$
+  - Level 1: $B, C$
+  - Level 2: $D, E, F$
+
+### 6.2 Key Differences Summary
+
+| Feature | Depth First Search (DFS) | Breadth First Search (BFS) |
+| :--- | :--- | :--- |
+| **Core Philosophy** | Goes deep along one path before backtracking | Explores all immediate neighbors level-by-level |
+| **Primary Data Structure**| **LIFO Stack** (call stack or explicit stack) | **FIFO Queue** |
+| **Shortest Path** | Does not find shortest path in unweighted graphs | **Guarantees shortest path** in unweighted graphs |
+| **Memory Consumption** | $O(\text{height})$, proportional to graph depth | $O(\text{breadth})$, proportional to maximum layer size |
+| **Backtracking** | Innate feature of the recursive approach | No backtracking mechanism needed |
+| **Typical Applications** | Topological sort, cycle detection, strongly connected components, maze solving | Shortest path, web crawling, peer-to-peer networks, garbage collection |
+
+## 7. Topological Sorting
+
+### 7.1 Concept and Conditions (DAG)
+A **Topological Sort** (or topological ordering) of a **Directed Acyclic Graph (DAG)** is a linear ordering of its vertices such that for every directed edge $(u, v)$ from vertex $u$ to vertex $v$, **$u$ precedes $v$** in the ordering:
+
+$$
+(u, v) \in E \implies \text{position}(u) < \text{position}(v)
+$$
+
+:::important[DAG Prerequisite]
+Topological sort is **only possible** on Directed Acyclic Graphs. If the graph contains any directed cycle, no linear dependency ordering exists because circular dependencies cannot be resolved.
+:::
+
+### 7.2 Real-World Analogy: Recipe Preparation
+Preparing pancakes requires dependencies to be completed in order:
+
+```mermaid
+flowchart LR
+    M["3/4 cup milk"] --> Mix["1 cup mix"]
+    E["1 egg"] --> Mix
+    O["1 Tbl oil"] --> Mix
+    HG["Heat griddle"] --> Pour["Pour 1/4 cup"]
+    Mix --> Pour
+    Pour --> Flip["Turn when bubbly"]
+    Flip --> Eat["Eat"]
+    HS["Heat syrup"] --> Eat
+```
+
+- Ingredients (milk, egg, oil) must be combined into mix before pouring.
+- Griddle must be heated before pouring mix.
+- Pancake must be turned when bubbly before eating.
+- Syrup must be heated before eating.
+
+### 7.3 Algorithms for Topological Sorting
+
+#### 7.3.1 Kahn's Algorithm (In-degree Elimination Method)
+1. Compute the **in-degree** for every vertex in the graph.
+2. Initialize a queue with all vertices having an **in-degree of 0** (no prerequisites).
+3. While the queue is not empty:
+   - Dequeue a vertex $u$ and append it to the topological output.
+   - For each outgoing edge $(u, v)$, decrement the in-degree of $v$ by 1.
+   - If the in-degree of $v$ drops to 0, enqueue $v$.
+4. If the count of visited vertices is less than $\|V\|$, the graph contains a **cycle**.
+
+#### 7.3.2 DFS-Based Approach
+1. Perform standard DFS traversal.
+2. When all outgoing neighbors of a vertex $u$ have finished processing (post-visit), push $u$ onto a stack.
+3. After completing DFS for all vertices, pop elements from the stack to produce the topological ordering.
+
+### 7.4 Trace Examples
+
+#### 7.4.1 Example 1 (Alphabetical Graph)
+Given DAG with vertices $\{A, B, C, D, E, F\}$ and edges:
+- $A \to B$, $A \to D$
+- $B \to C$
+- $C \to D$, $C \to E$
+- $D \to E$
+- $F$ (independent node, in-degree 0)
+
+```mermaid
+flowchart LR
+    A((A)) --> B((B))
+    A((A)) --> D((D))
+    B((B)) --> C((C))
+    C((C)) --> D((D))
+    C((C)) --> E((E))
+    D((D)) --> E((E))
+    F((F))
+```
+
+1. Vertices with in-degree 0: **$A$** and **$F$**.
+2. Select $A$, remove its edges $(A, B)$ and $(A, D)$. Output: `[A]`
+3. Next $B$ has in-degree 0, remove $(B, C)$. Output: `[A, B]`
+4. Next $C$ has in-degree 0, remove $(C, D)$ and $(C, E)$. Output: `[A, B, C]`
+5. Next $D$ has in-degree 0, remove $(D, E)$. Output: `[A, B, C, D]`
+6. Next $E$ has in-degree 0. Output: `[A, B, C, D, E]`
+7. Node $F$ has in-degree 0. Output: `[A, B, C, D, E, F]`
+- **Topological Order**: `A B C D E F`
+
+#### 7.4.2 Example 2 (Numerical Graph)
+Given DAG with vertices $\{0, 1, 2, 3, 4, 5\}$ and edges:
+- $5 \to 2$, $5 \to 0$
+- $4 \to 0$, $4 \to 1$
+- $2 \to 3$
+- $3 \to 1$
+
+```mermaid
+flowchart LR
+    5((5)) --> 2((2))
+    5((5)) --> 0((0))
+    4((4)) --> 0((0))
+    4((4)) --> 1((1))
+    2((2)) --> 3((3))
+    3((3)) --> 1((1))
+```
+
+**In-Degree Table**:
+- `0`: 2 (from 4, 5)
+- `1`: 2 (from 3, 4)
+- `2`: 1 (from 5)
+- `3`: 1 (from 2)
+- `4`: **0**
+- `5`: **0**
+
+**Step-by-Step Elimination**:
+1. Remove **4** (in-degree 0): decrements in-degree of 0 to 1, and 1 to 1.
+2. Remove **5** (in-degree 0): decrements in-degree of 2 to 0, and 0 to 0.
+3. Remove **0** (in-degree 0).
+4. Remove **2** (in-degree 0): decrements in-degree of 3 to 0.
+5. Remove **3** (in-degree 0): decrements in-degree of 1 to 0.
+6. Remove **1** (in-degree 0).
+- **Final Output Sequence**: `4 5 0 2 3 1`
+
+### 7.5 Complexity Analysis
+- **Time Complexity**: $O(V + E)$ (calculating in-degrees takes $O(V + E)$ and each vertex/edge is processed once).
+- **Space Complexity**: $O(V)$ for the in-degree array, queue/stack, and output array.
+
+### 7.6 Implementation
+
+<Tabs>
+  <TabItem value="cpp" label="C++">
+    ```cpp showLineNumbers
+    #include <iostream>
+    #include <vector>
+    #include <queue>
+    using namespace std;
+
+    vector<int> topologicalSort(int V, const vector<vector<int>>& adj) {
+        vector<int> in_degree(V, 0);
+        for (int u = 0; u < V; u++) {
+            for (int v : adj[u]) {
+                in_degree[v]++;
+            }
+        }
+
+        queue<int> q;
+        for (int i = 0; i < V; i++) {
+            if (in_degree[i] == 0) q.push(i);
+        }
+
+        vector<int> order;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            order.push_back(u);
+
+            for (int v : adj[u]) {
+                if (--in_degree[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+        return order;
+    }
+    ```
+  </TabItem>
+  <TabItem value="py" label="Python">
+    ```python showLineNumbers
+    from collections import deque
+
+    def topological_sort(V, adj):
+        in_degree = [0] * V
+        for u in range(V):
+            for v in adj[u]:
+                in_degree[v] += 1
+
+        q = deque([i for i in range(V) if in_degree[i] == 0])
+        order = []
+
+        while q:
+            u = q.popleft()
+            order.append(u)
+            for v in adj[u]:
+                in_degree[v] -= 1
+                if in_degree[v] == 0:
+                    q.append(v)
+
+        return order
+    ```
+  </TabItem>
+  <TabItem value="java" label="Java" default>
+    ```java showLineNumbers
+    import java.util.*;
+
+    public class TopologicalSort {
+        public static List<Integer> topoSort(int V, List<List<Integer>> adj) {
+            int[] inDegree = new int[V];
+            for (int u = 0; u < V; u++) {
+                for (int v : adj.get(u)) {
+                    inDegree[v]++;
+                }
+            }
+
+            Queue<Integer> q = new LinkedList<>();
+            for (int i = 0; i < V; i++) {
+                if (inDegree[i] == 0) q.add(i);
+            }
+
+            List<Integer> order = new ArrayList<>();
+            while (!q.isEmpty()) {
+                int u = q.poll();
+                order.add(u);
+
+                for (int v : adj.get(u)) {
+                    if (--inDegree[v] == 0) {
+                        q.add(v);
+                    }
+                }
+            }
+            return order;
+        }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## 8. Connected Components
+
+### 8.1 Connected Components in Undirected Graphs
+A **connected component** (or component) of an undirected graph is a **maximal subgraph** in which any two vertices are connected to each other by paths.
+
+```mermaid
+graph LR
+    subgraph Component 1
+        1((1)) --- 0((0))
+        1((1)) --- 2((2))
+    end
+    subgraph Component 2
+        3((3)) --- 4((4))
+    end
+```
+
+- In the example above, the graph has vertices $\{0, 1, 2, 3, 4\}$.
+- There are **two connected components**:
+  1. Component 1: Vertices `0, 1, 2`
+  2. Component 2: Vertices `3, 4`
+
+### 8.2 Strongly Connected Components (SCC) in Directed Graphs
+In a directed graph, connectivity has two forms:
+1. **Strongly Connected Component (SCC)**: A maximal subgraph where every vertex is reachable from every other vertex in the subgraph ($u \to v$ and $v \to u$ paths both exist).
+2. **Weakly Connected Component**: A subgraph that is connected if all directed edges are replaced with undirected edges.
+
+Algorithms to compute SCCs in $O(V + E)$ time:
+- **Kosaraju's Algorithm**: Two DFS passes (first on $G$, second on transpose graph $G^T$).
+- **Tarjan's Algorithm**: Single DFS pass maintaining discovery times and a stack.
+
+### 8.3 Computing Connected Components
+- Iterate through all vertices $v \in V$.
+- If $v$ is not yet visited, initiate a DFS or BFS traversal from $v$.
+- Every vertex discovered during that traversal belongs to the same connected component.
+- Increment the component counter and continue.
+- **Time Complexity**: $O(V + E)$
+- **Space Complexity**: $O(V)$
+
+<Tabs>
+  <TabItem value="cpp" label="C++">
+    ```cpp showLineNumbers
+    #include <iostream>
+    #include <vector>
+    using namespace std;
+
+    void dfsComponent(int u, const vector<vector<int>>& adj, vector<bool>& visited, vector<int>& comp) {
+        visited[u] = true;
+        comp.push_back(u);
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                dfsComponent(v, adj, visited, comp);
+            }
+        }
+    }
+
+    vector<vector<int>> findConnectedComponents(int V, const vector<vector<int>>& adj) {
+        vector<bool> visited(V, false);
+        vector<vector<int>> components;
+
+        for (int i = 0; i < V; i++) {
+            if (!visited[i]) {
+                vector<int> comp;
+                dfsComponent(i, adj, visited, comp);
+                components.push_back(comp);
+            }
+        }
+        return components;
+    }
+    ```
+  </TabItem>
+  <TabItem value="py" label="Python">
+    ```python showLineNumbers
+    def find_connected_components(V, adj):
+        visited = [False] * V
+        components = []
+
+        def dfs(u, comp):
+            visited[u] = True
+            comp.append(u)
+            for v in adj[u]:
+                if not visited[v]:
+                    dfs(v, comp)
+
+        for i in range(V):
+            if not visited[i]:
+                comp = []
+                dfs(i, comp)
+                components.append(comp)
+
+        return components
+    ```
+  </TabItem>
+  <TabItem value="java" label="Java" default>
+    ```java showLineNumbers
+    import java.util.*;
+
+    public class ConnectedComponents {
+        private static void dfs(int u, List<List<Integer>> adj, boolean[] visited, List<Integer> comp) {
+            visited[u] = true;
+            comp.add(u);
+            for (int v : adj.get(u)) {
+                if (!visited[v]) {
+                    dfs(v, adj, visited, comp);
+                }
+            }
+        }
+
+        public static List<List<Integer>> getComponents(int V, List<List<Integer>> adj) {
+            boolean[] visited = new boolean[V];
+            List<List<Integer>> components = new ArrayList<>();
+
+            for (int i = 0; i < V; i++) {
+                if (!visited[i]) {
+                    List<Integer> comp = new ArrayList<>();
+                    dfs(i, adj, visited, comp);
+                    components.add(comp);
+                }
+            }
+            return components;
+        }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## 9. Articulation Points (Cut Vertices)
+
+### 9.1 Concept and Vulnerability in Networks
+- An **articulation point** (or **cut vertex**) in a connected graph is a vertex whose removal (along with all its incident edges) **disconnects the graph** (increases the number of connected components).
+- **Cybersecurity & Network Relevance**: Articulation points represent critical **Single Points of Failure (SPOFs)**. If an attacker disables an articulation node (or router), the entire network fragments into isolated segments.
+
+### 9.2 Conditions for Articulation Points (Tarjan's DFS Tree)
+Using DFS traversal, we assign two values to every vertex $u$:
+- `disc[u]`: Discovery time when node $u$ is first visited.
+- `low[u]`: Lowest discovery time reachable from $u$ through tree edges and at most one back-edge.
+
+A vertex $u$ is an articulation point if:
+1. **Root Condition**: $u$ is the root of the DFS tree and has **two or more independent children** in the DFS tree.
+2. **Non-Root Condition**: $u$ is not the root of the DFS tree, and has a child $v$ such that:
+   $$
+   low[v] \ge disc[u]
+   $$
+   *(This signifies that no vertex in the subtree rooted at $v$ has a back-edge to any proper ancestor of $u$. Thus, removing $u$ traps $v$ and isolates the subtree).*
+
+### 9.3 Examples Walkthrough
+
+#### 9.3.1 Example 1
+Vertices: $\{1, 2, 3, 4, 5\}$ with edges:
+- Triangle: $(1, 4), (1, 2), (4, 2)$
+- Bridge edges: $(2, 3)$ and $(3, 5)$
+
+```mermaid
+graph LR
+    1((1)) --- 4((4))
+    1((1)) --- 2((2))
+    4((4)) --- 2((2))
+    2((2)) --- 3((3))
+    3((3)) --- 5((5))
+    style 2 fill:#ff6b6b,stroke:#c92a2a,stroke-width:2px,color:#fff
+    style 3 fill:#ff6b6b,stroke:#c92a2a,stroke-width:2px,color:#fff
+```
+
+- **Articulation Points**: **2, 3**
+- **Analysis**:
+  - Removing vertex `2` splits the graph into $\{1, 4\}$ and $\{3, 5\}$.
+  - Removing vertex `3` isolates vertex `5` from the rest of the graph.
+  - Removing vertices `1`, `4`, or `5` leaves the remaining vertices connected.
+
+#### 9.3.2 Example 2
+Vertices: $\{1, 2, 3, 4, 5, 6, 7\}$ with edges:
+- Triangle: $(1, 2), (1, 3), (2, 3)$
+- Leaf node attached: $(3, 4)$
+- Diamond component: $(3, 5), (3, 6), (5, 7), (6, 7)$
+
+```mermaid
+graph TD
+    1((1)) --- 2((2))
+    1((1)) --- 3((3))
+    2((2)) --- 3((3))
+    3((3)) --- 4((4))
+    3((3)) --- 5((5))
+    3((3)) --- 6((6))
+    5((5)) --- 7((7))
+    6((6)) --- 7((7))
+    style 3 fill:#ff6b6b,stroke:#c92a2a,stroke-width:2px,color:#fff
+```
+
+- **Articulation Points**: **3**
+- **Analysis**:
+  - Vertex `3` is the central nexus connecting 3 distinct groups: $\{1, 2\}$, $\{4\}$, and $\{5, 6, 7\}$.
+  - Removing vertex `3` divides the graph into **3 separate disconnected components**.
+  - No other individual vertex deletion disconnects the graph.
+
+### 9.4 Complexity Analysis
+- **Time Complexity**: $O(V + E)$ (a single DFS traversal).
+- **Space Complexity**: $O(V)$ auxiliary arrays for `disc[]`, `low[]`, `parent[]`, and recursion stack.
+
+### 9.5 Implementation
+
+<Tabs>
+  <TabItem value="cpp" label="C++">
+    ```cpp showLineNumbers
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    using namespace std;
+
+    void dfsAP(int u, int parent, int& timer, const vector<vector<int>>& adj,
+               vector<int>& disc, vector<int>& low, vector<bool>& isAP) {
+        disc[u] = low[u] = ++timer;
+        int children = 0;
+
+        for (int v : adj[u]) {
+            if (v == parent) continue;
+
+            if (disc[v] != 0) {
+                // Back-edge
+                low[u] = min(low[u], disc[v]);
+            } else {
+                // Forward tree-edge
+                children++;
+                dfsAP(v, u, timer, adj, disc, low, isAP);
+                low[u] = min(low[u], low[v]);
+
+                if (parent != -1 && low[v] >= disc[u]) {
+                    isAP[u] = true;
+                }
+            }
+        }
+
+        if (parent == -1 && children > 1) {
+            isAP[u] = true;
+        }
+    }
+
+    vector<int> findArticulationPoints(int V, const vector<vector<int>>& adj) {
+        vector<int> disc(V + 1, 0), low(V + 1, 0);
+        vector<bool> isAP(V + 1, false);
+        int timer = 0;
+
+        for (int i = 1; i <= V; i++) {
+            if (disc[i] == 0) {
+                dfsAP(i, -1, timer, adj, disc, low, isAP);
+            }
+        }
+
+        vector<int> result;
+        for (int i = 1; i <= V; i++) {
+            if (isAP[i]) result.push_back(i);
+        }
+        return result;
+    }
+    ```
+  </TabItem>
+  <TabItem value="py" label="Python">
+    ```python showLineNumbers
+    def find_articulation_points(V, adj):
+        disc = [0] * (V + 1)
+        low = [0] * (V + 1)
+        is_ap = [False] * (V + 1)
+        timer = 0
+
+        def dfs(u, parent):
+            nonlocal timer
+            timer += 1
+            disc[u] = low[u] = timer
+            children = 0
+
+            for v in adj[u]:
+                if v == parent:
+                    continue
+                if disc[v] != 0:
+                    low[u] = min(low[u], disc[v])
+                else:
+                    children += 1
+                    dfs(v, u)
+                    low[u] = min(low[u], low[v])
+                    if parent != -1 and low[v] >= disc[u]:
+                        is_ap[u] = True
+
+            if parent == -1 and children > 1:
+                is_ap[u] = True
+
+        for i in range(1, V + 1):
+            if disc[i] == 0:
+                dfs(i, -1)
+
+        return [i for i in range(1, V + 1) if is_ap[i]]
+    ```
+  </TabItem>
+  <TabItem value="java" label="Java" default>
+    ```java showLineNumbers
+    import java.util.*;
+
+    public class ArticulationPoints {
+        private static int timer;
+
+        private static void dfs(int u, int parent, List<List<Integer>> adj,
+                                int[] disc, int[] low, boolean[] isAP) {
+            disc[u] = low[u] = ++timer;
+            int children = 0;
+
+            for (int v : adj.get(u)) {
+                if (v == parent) continue;
+
+                if (disc[v] != 0) {
+                    low[u] = Math.min(low[u], disc[v]);
+                } else {
+                    children++;
+                    dfs(v, u, adj, disc, low, isAP);
+                    low[u] = Math.min(low[u], low[v]);
+
+                    if (parent != -1 && low[v] >= disc[u]) {
+                        isAP[u] = true;
+                    }
+                }
+            }
+
+            if (parent == -1 && children > 1) {
+                isAP[u] = true;
+            }
+        }
+
+        public static List<Integer> getArticulationPoints(int V, List<List<Integer>> adj) {
+            int[] disc = new int[V + 1];
+            int[] low = new int[V + 1];
+            boolean[] isAP = new boolean[V + 1];
+            timer = 0;
+
+            for (int i = 1; i <= V; i++) {
+                if (disc[i] == 0) {
+                    dfs(i, -1, adj, disc, low, isAP);
+                }
+            }
+
+            List<Integer> result = new ArrayList<>();
+            for (int i = 1; i <= V; i++) {
+                if (isAP[i]) result.add(i);
+            }
+            return result;
+        }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## 10. Summary and Quick Revision Cheat Sheet
+
+### 10.1 Graph Algorithm Complexity Master Table
+
+| Algorithm | Primary Data Structure | Graph Compatibility | Time Complexity | Space Complexity | Primary Use Case |
+| :--- | :--- | :--- | :---: | :---: | :--- |
+| **DFS** | LIFO Stack (call stack) | Directed & Undirected | $O(V + E)$ | $O(V)$ | Connectivity, cycle detection, path finding |
+| **BFS** | FIFO Queue | Directed & Undirected | $O(V + E)$ | $O(V)$ | Shortest path in unweighted graphs, level order |
+| **Topological Sort** | In-degree array + Queue / Stack | **DAG only** | $O(V + E)$ | $O(V)$ | Task scheduling, dependency resolution, build systems |
+| **Connected Components** | Visited array + DFS/BFS | Undirected Graphs | $O(V + E)$ | $O(V)$ | Network partitioning, cluster discovery |
+| **Articulation Points** | DFS Tree (`disc[]`, `low[]`) | Connected Undirected | $O(V + E)$ | $O(V)$ | Single Point of Failure (SPOF) identification |
+
+### 10.2 Formula and Rule Quick-Sheet
+- **Graph Formal Definition**: $G = \langle N, A \rangle$, where $N$ is the set of nodes and $A$ is the set of edges.
+- **Topological Condition**: Directed Acyclic Graph (DAG) only. If in-degree 0 vertices vanish before all vertices are visited, a **cycle exists**.
+- **Articulation Point Conditions**:
+  - Root: $\ge 2$ children in DFS tree.
+  - Non-root: Child $v$ satisfies $low[v] \ge disc[u]$.
