@@ -321,8 +321,8 @@ procedure queens(k, col, diag45, diag135)
 
 ### 5.2 Bounding Functions and Pruning Strategies
 At any node $x$ in the state space tree:
-- For **Minimization**: Compute a **Lower Bound** $\hat{c}(x)$. If $\hat{c}(x) \ge \text{current best}$, prune node $x$.
-- For **Maximization**: Compute an **Upper Bound** $\hat{u}(x)$. If $\hat{u}(x) \le \text{current best}$, prune node $x$.
+- For **Minimization**: Compute a **Lower Bound** $\hat{c}(x)$. If $\hat{c}(x) \ge$ current best, prune node $x$.
+- For **Maximization**: Compute an **Upper Bound** $\hat{u}(x)$. If $\hat{u}(x) \le$ current best, prune node $x$.
 
 ### 5.3 Depth-First Branch and Bound (DFBB) on N-Queens
 When using Depth-First Branch and Bound on $N$-Queens:
