@@ -19,7 +19,7 @@ Rather than ending with a successful shell or session, post-exploitation focuses
 In ethical hacking and Vulnerability Assessment and Penetration Testing (VAPT), the engagement progresses through distinct phases:
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["1. Reconnaissance"] --> B["2. Scanning & Enumeration"]
     B --> C["3. Exploitation (Gain Access)"]
     C --> D["4. Post-Exploitation (Leverage Access)"]
@@ -58,7 +58,7 @@ During ethical security testing, a professional leverages the initial foothold t
 The Metasploit Framework organizes its post-exploitation capabilities under dedicated `post/` module namespaces structured by operating system and functional objective:
 
 ```mermaid
-flowchart TD
+flowchart LR
     ROOT["post/"] --> WIN["windows/"]
     ROOT --> LNX["linux/"]
     ROOT --> MLT["multi/"]
@@ -108,8 +108,9 @@ flowchart TD
     MIG -- "Captures Windows Messages / Hooks" --> EXP
 ```
 
-> [!IMPORTANT]
+:::warning[IMPORTANT]
 > If a post-exploitation session resides inside a Session 0 service process, it **cannot** receive desktop keystrokes. Capturing keystrokes requires migrating into an active interactive process running within the logged-in user's desktop session.
+:::
 
 ### 2.2 Keylogger Recorder (`keylog_recorder`)
 #### 2.2.1 Module Definition
@@ -246,7 +247,7 @@ In enterprise environments, internal database servers and domain controllers fre
 When an external-facing dual-homed machine (e.g., a web server with both external and internal NICs) is compromised, the tester turns that host into a **pivot point**:
 
 ```mermaid
-flowchart LR
+flowchart TD
     ATK["Attacker Machine\n(192.168.1.50)"] -- "Meterpreter Session 1" --> COMP["Compromised Dual-Homed Host\nNIC1: 192.168.1.100\nNIC2: 10.10.20.15"]
     
     subgraph Isolated Internal Subnet ["Isolated Subnet (10.10.20.0/24)"]
