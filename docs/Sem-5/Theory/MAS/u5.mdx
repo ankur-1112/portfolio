@@ -254,7 +254,7 @@ sequenceDiagram
 ### 3.2 The Two Primary Attack Exploitation Points
 
 ```mermaid
-flowchart TD
+flowchart LR
     User["Mobile Client App"]
     AP["Rogue Wi-Fi / Carrier Net"]
     Server["Application Server / Gateway"]
@@ -370,7 +370,7 @@ Improper authentication and authorization architectures expose mobile backends a
 ### 5.2 Ten Principles for Robust Authentication and Authorization
 
 ```mermaid
-flowchart TD
+flowchart LR
     A["Robust Auth & Authz Strategy"]
     
     A --> B["User Identification & Verification"]
@@ -427,7 +427,7 @@ Broken Cryptography refers to situations where cryptographic primitives, algorit
 ### 6.2 Seven Root Causes of Cryptographic Failure
 
 ```mermaid
-flowchart TD
+flowchart LR
     Crypto["Broken Cryptography Causes"]
     
     Crypto --> C1["1. Weak Key Generation (Small Keyspace / Flawed PRNG)"]
@@ -473,7 +473,7 @@ flowchart TD
 Client-side injection vulnerabilities occur when an application accepts untrusted data that is subsequently interpreted, rendered, or executed as code within the client execution environment (e.g., a mobile browser, WebView, or local client template engine). This contrasts with server-side injection, which executes malicious commands within backend databases, servers, or operating systems.
 
 ```mermaid
-flowchart LR
+flowchart TD
     Attacker["Attacker Payload"] -->|Input Field / Deep Link / Push Notification| App["Mobile Client App"]
     App -->|Unsanitized Data| WebView["Embedded WebView / JS Engine"]
     
@@ -513,7 +513,7 @@ Relying on untrusted, client-supplied input to drive critical authorization, aut
 ### 8.2 Eight Defensive Design Principles
 
 ```mermaid
-flowchart TD
+flowchart LR
     Rule["Defensive Engineering for Untrusted Input"]
     
     Rule --> R1["1. Strict Input Validation (Allow-listing & Schema Enforcement)"]
@@ -553,7 +553,7 @@ Mobile applications rely on session tokens (such as JWTs, OAuth access tokens, o
 ### 9.2 Six Core Session Handling Vulnerabilities
 
 ```mermaid
-flowchart TD
+flowchart LR
     SessionFlaws["Improper Session Handling Defects"]
     
     SessionFlaws --> S1["1. Session Fixation (Pre-Authentication Token Retention)"]
@@ -602,7 +602,7 @@ Lack of Binary Protection refers to compiling, packaging, and distributing mobil
 ### 10.2 Eight Essential Binary Hardening Mechanisms
 
 ```mermaid
-flowchart TD
+flowchart LR
     Binary["Binary Protection Defense Stack"]
     
     Binary --> B1["1. Code Signing (Authenticity & Integrity Verification)"]
