@@ -26,7 +26,7 @@ Setting up a mobile application penetration testing environment involves establi
 ### 1.2 Essential Tooling and Software Stack
 
 ```mermaid
-flowchart TD
+flowchart LR
     A["Mobile Pentest Environment Setup"] --> B["Virtual Environment (VMware / VirtualBox)"]
     A --> C["Emulators & Physical Devices"]
     A --> D["Platform SDKs & IDEs"]
@@ -169,7 +169,7 @@ flowchart LR
 Drozer is a comprehensive security audit and attack framework for Android. It allows security testers to assume the role of an untrusted third-party application installed on the target device, probing the system and other apps for IPC vulnerabilities.
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Workstation["Pentester Workstation"]
         Console["Drozer Console (CLI / Python)"]
     end
@@ -385,7 +385,7 @@ flowchart TD
         <!-- Insecurely Exported Admin Activity (Vulnerability: Authentication Bypass) -->
         <activity
             android:name=".AdminDashboardActivity"
-            android:exported="true" />
+            android:exported="true" /> |>
 
         <!-- Protected Background Service -->
         <service

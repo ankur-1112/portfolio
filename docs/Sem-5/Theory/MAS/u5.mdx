@@ -23,7 +23,7 @@ flowchart TD
     Client -->|Insecure Transport / API Call| API
     API -->|Unvalidated Request| Server
     Server -->|Vulnerable Query| DB
-    Server -->|Unprotected Channel (Point 2)| Internal
+    Server -->|"Unprotected Channel (Point 2)"| Internal
 
     subgraph ServerAttacks["Server-Side Attack Vectors"]
         A1["Inadequate Input Validation (SQLi, SSRF)"]
@@ -86,7 +86,7 @@ flowchart TD
 Insecure Data Storage occurs when an application stores unencrypted, improperly protected, or unhashed sensitive data within a device's local file system, external media, or memory.
 
 ```mermaid
-flowchart LR
+flowchart TD
     Attacker["Threat Agent"]
     
     subgraph Vectors["Access Vectors"]
@@ -236,7 +236,8 @@ sequenceDiagram
         Client->>Attacker: Encrypted Session Key (using Attacker Public Key)
         Note over Attacker: Decrypts Key, Intercepts & Modifies Traffic
         Attacker->>Server: Re-encrypted Session Key (using Server Public Key)
-        Client<-->>Server: Traffic fully intercepted via Attacker
+        Client->>Server: Traffic fully intercepted via Attacker
+        Server->>Client: Traffic fully intercepted via Attacker
     else Secure Client (Strict Validation & SSL Pinning)
         Note over Client: Certificate rejected (Untrusted Root / Pin Mismatch)
         Client--xAttacker: Connection Terminated Immediately
@@ -253,7 +254,7 @@ sequenceDiagram
 ### 3.2 The Two Primary Attack Exploitation Points
 
 ```mermaid
-flowchart LR
+flowchart TD
     User["Mobile Client App"]
     AP["Rogue Wi-Fi / Carrier Net"]
     Server["Application Server / Gateway"]
