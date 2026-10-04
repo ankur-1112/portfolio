@@ -7,9 +7,6 @@ sidebar_position: 6
 ## Backtracking & Branch and Bound
 :::
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 ## 1. Introduction to Backtracking
 
 ### 1.1 Core Concept and Philosophy
@@ -190,122 +187,40 @@ procedure queens(k, col, diag45, diag135)
 - **Time Complexity**: Upper bounded by $O(N!)$. While a brute-force search evaluates $O(N^N)$ configurations, backtracking checks only permutations ($N!$) and aggressively prunes conflicting diagonal branches early.
 - **Space Complexity**: $O(N)$ auxiliary space for the recursive call stack and tracking arrays for columns and diagonals.
 
-### 4.3 Multi-Language Implementation
+### 4.3 Standard Backtracking Formulation (Place & NQueens Algorithm)
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <cmath>
-    using namespace std;
-
-    bool isSafe(int row, int col, const vector<int>& sol) {
-        for (int i = 1; i < row; i++) {
-            if (sol[i] == col || abs(sol[i] - col) == abs(i - row)) {
-                return false;
-            }
-        }
-        return true;
+```text showLineNumbers
+Algorithm Place(k, i)
+// Returns true if a queen can be placed in kth row and ith column.
+// Otherwise returns false. x[] is a global array whose first (k - 1)
+// values have been set. abs(r) returns the absolute value of r.
+{
+    for j <- 1 to k - 1 do
+    {
+        // Check for column conflict or diagonal conflict
+        if (x[j] = i or abs(x[j] - i) = abs(j - k)) then
+            return false;
     }
+    return true;
+}
 
-    void solveNQueens(int row, int n, vector<int>& sol, vector<vector<int>>& results) {
-        if (row > n) {
-            results.push_back(sol);
-            return;
-        }
-        for (int col = 1; col <= n; col++) {
-            if (isSafe(row, col, sol)) {
-                sol[row] = col;
-                solveNQueens(row + 1, n, sol, results);
-                sol[row] = 0; // Backtrack
-            }
-        }
-    }
-
-    int main() {
-        int n = 4;
-        vector<int> sol(n + 1, 0);
-        vector<vector<int>> results;
-        solveNQueens(1, n, sol, results);
-        for (const auto& res : results) {
-            cout << "<";
-            for (int i = 1; i <= n; i++) cout << res[i] << (i < n ? ", " : "");
-            cout << ">\n";
-        }
-        return 0;
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def solve_n_queens(n):
-        solutions = []
-        sol = [0] * (n + 1)
-
-        def is_safe(row, col):
-            for i in range(1, row):
-                if sol[i] == col or abs(sol[i] - col) == abs(i - row):
-                    return False
-            return True
-
-        def backtrack(row):
-            if row > n:
-                solutions.append(sol[1:])
-                return
-            for col in range(1, n + 1):
-                if is_safe(row, col):
-                    sol[row] = col
-                    backtrack(row + 1)
-                    sol[row] = 0  # Backtrack
-
-        backtrack(1)
-        return solutions
-
-    print(solve_n_queens(4))
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    public class NQueens {
-        private static boolean isSafe(int row, int col, int[] sol) {
-            for (int i = 1; i < row; i++) {
-                if (sol[i] == col || Math.abs(sol[i] - col) == Math.abs(i - row)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static void solve(int row, int n, int[] sol, List<List<Integer>> results) {
-            if (row > n) {
-                List<Integer> valid = new ArrayList<>();
-                for (int i = 1; i <= n; i++) valid.add(sol[i]);
-                results.add(valid);
-                return;
-            }
-            for (int col = 1; col <= n; col++) {
-                if (isSafe(row, col, sol)) {
-                    sol[row] = col;
-                    solve(row + 1, n, sol, results);
-                    sol[row] = 0; // Backtrack
-                }
-            }
-        }
-
-        public static void main(String[] args) {
-            int n = 4;
-            int[] sol = new int[n + 1];
-            List<List<Integer>> results = new ArrayList<>();
-            solve(1, n, sol, results);
-            System.out.println(results);
+Algorithm NQueens(k, n)
+// Using backtracking, this procedure prints all possible placements of
+// n queens on an n x n chessboard so that no two queens attack each other.
+{
+    for i <- 1 to n do
+    {
+        if Place(k, i) then
+        {
+            x[k] <- i;
+            if (k = n) then
+                write(x[1..n]);
+            else
+                NQueens(k + 1, n);
         }
     }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 5. Branch and Bound
 
@@ -395,75 +310,42 @@ function backpack(i, r)
     return b
 ```
 
-### 6.5 Multi-Language Implementation
+### 6.5 Backtracking 0/1 Knapsack Algorithm with Bounding Function
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <algorithm>
-    using namespace std;
-
-    int backpack(int i, int r, const vector<int>& w, const vector<int>& v) {
-        int b = 0;
-        int n = w.size();
-        for (int k = i; k < n; k++) {
-            if (w[k] <= r) {
-                b = max(b, v[k] + backpack(k, r - w[k], w, v));
-            }
-        }
-        return b;
-    }
-
-    int main() {
-        vector<int> w = {2, 3, 4, 5};
-        vector<int> v = {3, 5, 6, 10};
-        int W = 8;
-        cout << "Max Value: " << backpack(0, W, w, v) << endl; // Output: 15
-        return 0;
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def backpack(i, r, w, v):
-        b = 0
-        n = len(w)
-        for k in range(i, n):
-            if w[k] <= r:
-                b = max(b, v[k] + backpack(k, r - w[k], w, v))
-        return b
-
-    weights = [2, 3, 4, 5]
-    values = [3, 5, 6, 10]
-    capacity = 8
-    print("Max Value:", backpack(0, capacity, weights, values)) # Output: 15
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    public class KnapsackBacktracking {
-        public static int backpack(int i, int r, int[] w, int[] v) {
-            int b = 0;
-            for (int k = i; k < w.length; k++) {
-                if (w[k] <= r) {
-                    b = Math.max(b, v[k] + backpack(k, r - w[k], w, v));
-                }
-            }
-            return b;
-        }
-
-        public static void main(String[] args) {
-            int[] w = {2, 3, 4, 5};
-            int[] v = {3, 5, 6, 10};
-            int W = 8;
-            System.out.println("Max Value: " + backpack(0, W, w, v)); // Output: 15
+```text showLineNumbers
+Algorithm BKnap(k, cp, cw)
+// Generates optimal solution for 0/1 Knapsack using Backtracking
+// cp is current profit; cw is current weight; k is current item index
+// w[i] and p[i] are weights and profits sorted such that p[i]/w[i] >= p[i+1]/w[i+1]
+// m is knapsack capacity; maxprofit is maximum profit found so far
+{
+    // Generate left child: Include item k
+    if (cw + w[k] <= m) then
+    {
+        y[k] <- 1;
+        if (k < n) then
+            BKnap(k + 1, cp + p[k], cw + w[k]);
+        if (cp + p[k] > maxprofit and k = n) then
+        {
+            maxprofit <- cp + p[k];
+            for j <- 1 to n do x[j] <- y[j];
         }
     }
-    ```
-  </TabItem>
-</Tabs>
+
+    // Generate right child: Exclude item k
+    if (Bound(cp, cw, k) > maxprofit) then
+    {
+        y[k] <- 0;
+        if (k < n) then
+            BKnap(k + 1, cp, cw);
+        if (cp > maxprofit and k = n) then
+        {
+            maxprofit <- cp;
+            for j <- 1 to n do x[j] <- y[j];
+        }
+    }
+}
+```
 
 ## 7. Minimax Principle in Game Trees
 
@@ -530,65 +412,39 @@ By recursively evaluating possible remaining moves:
 - If $O$ can block or make a winning line $\implies -10$.
 - Backtracking propagates these outcomes so $X$ always selects the move maximizing guaranteed outcome.
 
-### 7.6 Multi-Language Implementation
+### 7.6 Minimax Decision Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <algorithm>
-    using namespace std;
+```text showLineNumbers
+Algorithm Minimax(node, depth, isMaximizingPlayer)
+// Recursively evaluates game tree to determine optimal value for current player
+// Input: node representing game state, current depth, boolean isMaximizingPlayer
+// Output: Evaluated optimal score for current game position
+{
+    if (depth = max_depth or is_terminal(node)) then
+        return evaluate(node);
 
-    int minimax(int depth, int nodeIndex, bool isMax, const vector<int>& scores, int h) {
-        if (depth == h) {
-            return scores[nodeIndex];
+    if isMaximizingPlayer then
+    {
+        bestValue <- -infinity;
+        for each child in get_children(node) do
+        {
+            val <- Minimax(child, depth + 1, false);
+            bestValue <- max(bestValue, val);
         }
-
-        if (isMax) {
-            return max(minimax(depth + 1, nodeIndex * 2, false, scores, h),
-                       minimax(depth + 1, nodeIndex * 2 + 1, false, scores, h));
-        } else {
-            return min(minimax(depth + 1, nodeIndex * 2, true, scores, h),
-                       minimax(depth + 1, nodeIndex * 2 + 1, true, scores, h));
-        }
+        return bestValue;
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def minimax(depth, node_index, is_max, scores, h):
-        if depth == h:
-            return scores[node_index]
-
-        if is_max:
-            return max(minimax(depth + 1, node_index * 2, False, scores, h),
-                       minimax(depth + 1, node_index * 2 + 1, False, scores, h))
-        else:
-            return min(minimax(depth + 1, node_index * 2, True, scores, h),
-                       minimax(depth + 1, node_index * 2 + 1, True, scores, h))
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    public class Minimax {
-        public static int minimax(int depth, int nodeIndex, boolean isMax, int[] scores, int h) {
-            if (depth == h) {
-                return scores[nodeIndex];
-            }
-
-            if (isMax) {
-                return Math.max(minimax(depth + 1, nodeIndex * 2, false, scores, h),
-                                minimax(depth + 1, nodeIndex * 2 + 1, false, scores, h));
-            } else {
-                return Math.min(minimax(depth + 1, nodeIndex * 2, true, scores, h),
-                                minimax(depth + 1, nodeIndex * 2 + 1, true, scores, h));
-            }
+    else
+    {
+        bestValue <- +infinity;
+        for each child in get_children(node) do
+        {
+            val <- Minimax(child, depth + 1, true);
+            bestValue <- min(bestValue, val);
         }
+        return bestValue;
     }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 8. Travelling Salesman Problem (TSP)
 
@@ -621,93 +477,35 @@ Using **Least Cost Branch and Bound (LCBB)**:
 - **Brute Force Search**: $(n - 1)! / 2$ possible tours $\implies O(n!)$ time.
 - **Branch and Bound**: Prunes significant portions of the state space tree, though worst-case remains exponential.
 
-### 8.5 Multi-Language Implementation (Backtracking Approach)
+### 8.5 TSP Backtracking Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <algorithm>
-    #include <climits>
-    using namespace std;
+```text showLineNumbers
+Algorithm TSPBacktrack(currCity, count, cost, start)
+// Solves Travelling Salesperson Problem using backtracking with cost bounding
+// graph[1..n, 1..n] is adjacency cost matrix; visited[1..n] tracks visited cities
+// minCost stores the minimum Hamiltonian tour cost found so far
+{
+    if (count = n and graph[currCity, start] > 0) then
+    {
+        minCost <- min(minCost, cost + graph[currCity, start]);
+        return;
+    }
 
-    void tspBacktrack(int currCity, int count, int cost, int start,
-                      int& minCost, const vector<vector<int>>& graph,
-                      vector<bool>& visited, int n) {
-        if (count == n && graph[currCity][start] > 0) {
-            minCost = min(minCost, cost + graph[currCity][start]);
-            return;
-        }
-
-        for (int nextCity = 0; nextCity < n; nextCity++) {
-            if (!visited[nextCity] && graph[currCity][nextCity] > 0) {
-                // Prune if current cost already exceeds best found
-                if (cost + graph[currCity][nextCity] < minCost) {
-                    visited[nextCity] = true;
-                    tspBacktrack(nextCity, count + 1, cost + graph[currCity][nextCity],
-                                 start, minCost, graph, visited, n);
-                    visited[nextCity] = false; // Backtrack
-                }
+    for nextCity <- 1 to n do
+    {
+        if (not visited[nextCity] and graph[currCity, nextCity] > 0) then
+        {
+            // Prune if current accumulated cost already exceeds best found tour
+            if (cost + graph[currCity, nextCity] < minCost) then
+            {
+                visited[nextCity] <- true;
+                TSPBacktrack(nextCity, count + 1, cost + graph[currCity, nextCity], start);
+                visited[nextCity] <- false; // Backtrack
             }
         }
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def tsp_backtracking(graph):
-        n = len(graph)
-        visited = [False] * n
-        min_cost = float('inf')
-
-        def backtrack(curr_city, count, cost):
-            nonlocal min_cost
-            if count == n and graph[curr_city][0] > 0:
-                min_cost = min(min_cost, cost + graph[curr_city][0])
-                return
-
-            for next_city in range(n):
-                if not visited[next_city] and graph[curr_city][next_city] > 0:
-                    if cost + graph[curr_city][next_city] < min_cost:
-                        visited[next_city] = True
-                        backtrack(next_city, count + 1, cost + graph[curr_city][next_city])
-                        visited[next_city] = False  # Backtrack
-
-        visited[0] = True
-        backtrack(0, 1, 0)
-        return min_cost
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    public class TSPBacktracking {
-        private static int minCost = Integer.MAX_VALUE;
-
-        public static void tsp(int currCity, int count, int cost, int start,
-                               int[][] graph, boolean[] visited, int n) {
-            if (count == n && graph[currCity][start] > 0) {
-                minCost = Math.min(minCost, cost + graph[currCity][start]);
-                return;
-            }
-
-            for (int nextCity = 0; nextCity < n; nextCity++) {
-                if (!visited[nextCity] && graph[currCity][nextCity] > 0) {
-                    if (cost + graph[currCity][nextCity] < minCost) {
-                        visited[nextCity] = true;
-                        tsp(nextCity, count + 1, cost + graph[currCity][nextCity],
-                            start, graph, visited, n);
-                        visited[nextCity] = false; // Backtrack
-                    }
-                }
-            }
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 9. Summary and Quick Revision Cheat Sheet
 

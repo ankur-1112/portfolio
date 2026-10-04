@@ -7,9 +7,6 @@ sidebar_position: 3
 ## Greedy Algorithms
 :::
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 ## 1. Introduction
 
 ### 1.1 Overview
@@ -74,143 +71,33 @@ xychart-beta
     line "O(E log E)" [33, 282, 664, 4482, 9965]
 ```
 
-### 5.4 Implementation
+### 5.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <bits/stdc++.h>
-    using namespace std;
+```text showLineNumbers
+Algorithm Kruskal(G, w)
+// Finds Minimum Spanning Tree (MST) using greedy approach
+// Input: Connected, undirected weighted graph G = (V, E) with weight function w
+// Output: Set of edges A forming the MST
+{
+    A <- empty set;
 
-    struct Edge { int u, v, weight; };
-    bool compare(Edge a, Edge b) { return a.weight < b.weight; }
+    for each vertex v in V do
+        MakeSet(v);
 
-    int find(int i, vector<int>& parent) {
-        if (parent[i] == i) return i;
-        return parent[i] = find(parent[i], parent);
-    }
+    // Sort edges into non-decreasing order by weight w
+    sort the edges of E in non-decreasing order of weight w;
 
-    void union_set(int u, int v, vector<int>& parent, vector<int>& rank) {
-        int root_u = find(u, parent);
-        int root_v = find(v, parent);
-        if (root_u != root_v) {
-            if (rank[root_u] < rank[root_v]) parent[root_u] = root_v;
-            else if (rank[root_u] > rank[root_v]) parent[root_v] = root_u;
-            else { parent[root_v] = root_u; rank[root_u]++; }
+    for each edge (u, v) in E (taken in sorted order) do
+    {
+        if (FindSet(u) != FindSet(v)) then
+        {
+            A <- A union {(u, v)};
+            Union(u, v);
         }
     }
-
-    void kruskalMST(vector<Edge>& edges, int V) {
-        sort(edges.begin(), edges.end(), compare);
-        vector<int> parent(V);
-        vector<int> rank(V, 0);
-        for (int i = 0; i < V; i++) parent[i] = i;
-
-        int mst_weight = 0;
-        for (auto& edge : edges) {
-            int u = edge.u;
-            int v = edge.v;
-            if (find(u, parent) != find(v, parent)) {
-                mst_weight += edge.weight;
-                union_set(u, v, parent, rank);
-            }
-        }
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    class DisjointSet:
-        def __init__(self, vertices):
-            self.parent = {v: v for v in vertices}
-            self.rank = {v: 0 for v in vertices}
-
-        def find(self, item):
-            if self.parent[item] == item: return item
-            self.parent[item] = self.find(self.parent[item])
-            return self.parent[item]
-
-        def union(self, x, y):
-            xroot = self.find(x)
-            yroot = self.find(y)
-            if xroot != yroot:
-                if self.rank[xroot] < self.rank[yroot]: self.parent[xroot] = yroot
-                elif self.rank[xroot] > self.rank[yroot]: self.parent[yroot] = xroot
-                else:
-                    self.parent[yroot] = xroot
-                    self.rank[xroot] += 1
-
-    def kruskal_mst(vertices, edges):
-        edges.sort(key=lambda x: x[2])
-        ds = DisjointSet(vertices)
-        mst_weight = 0
-        for u, v, weight in edges:
-            if ds.find(u) != ds.find(v):
-                ds.union(u, v)
-                mst_weight += weight
-        return mst_weight
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    class KruskalMST {
-        static class Edge implements Comparable<Edge> {
-            int u, v, weight;
-            public int compareTo(Edge compareEdge) {
-                return this.weight - compareEdge.weight;
-            }
-        }
-
-        static class subset {
-            int parent, rank;
-        }
-
-        static int find(subset subsets[], int i) {
-            if (subsets[i].parent != i)
-                subsets[i].parent = find(subsets, subsets[i].parent);
-            return subsets[i].parent;
-        }
-
-        static void union(subset subsets[], int x, int y) {
-            int xroot = find(subsets, x);
-            int yroot = find(subsets, y);
-
-            if (subsets[xroot].rank < subsets[yroot].rank)
-                subsets[xroot].parent = yroot;
-            else if (subsets[xroot].rank > subsets[yroot].rank)
-                subsets[yroot].parent = xroot;
-            else {
-                subsets[yroot].parent = xroot;
-                subsets[xroot].rank++;
-            }
-        }
-
-        static void kruskalMST(Edge edges[], int V) {
-            Arrays.sort(edges);
-            subset subsets[] = new subset[V];
-            for (int i = 0; i < V; ++i) {
-                subsets[i] = new subset();
-                subsets[i].parent = i;
-                subsets[i].rank = 0;
-            }
-
-            int mst_weight = 0;
-            for (int i = 0; i < edges.length; ++i) {
-                int x = find(subsets, edges[i].u);
-                int y = find(subsets, edges[i].v);
-
-                if (x != y) {
-                    mst_weight += edges[i].weight;
-                    union(subsets, x, y);
-                }
-            }
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+    return A;
+}
+```
 
 ## 6. Prim’s Algorithm
 
@@ -238,111 +125,37 @@ xychart-beta
     line "O(V^2)" [100, 2500, 10000, 250000, 1000000]
 ```
 
-### 6.4 Implementation
+### 6.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <bits/stdc++.h>
-    using namespace std;
+```text showLineNumbers
+Algorithm Prim(G, w, r)
+// Finds Minimum Spanning Tree (MST) starting from root vertex r
+// Input: Connected, undirected weighted graph G = (V, E) with weight function w, root r
+// Output: MST represented by parent pointers parent[u]
+{
+    for each u in V do
+    {
+        key[u] <- infinity;
+        parent[u] <- NIL;
+    }
+    key[r] <- 0;
+    Q <- V; // Build min-priority queue of all vertices keyed by key[u]
 
-    void primMST(vector<vector<pair<int, int>>>& adj, int V) {
-        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-        vector<int> key(V, INT_MAX);
-        vector<bool> inMST(V, false);
-        int src = 0; 
-        pq.push({0, src});
-        key[src] = 0;
-
-        int mst_weight = 0;
-        while (!pq.empty()) {
-            int u = pq.top().second;
-            int weight = pq.top().first;
-            pq.pop();
-
-            if (inMST[u]) continue;
-            inMST[u] = true;
-            mst_weight += weight;
-
-            for (auto& neighbor : adj[u]) {
-                int v = neighbor.first;
-                int w = neighbor.second;
-                if (!inMST[v] && w < key[v]) {
-                    key[v] = w;
-                    pq.push({w, v});
-                }
+    while not EMPTY(Q) do
+    {
+        u <- ExtractMin(Q);
+        for each vertex v in Adj[u] do
+        {
+            if (v in Q and w(u, v) < key[v]) then
+            {
+                parent[v] <- u;
+                key[v] <- w(u, v);
+                DecreaseKey(Q, v, key[v]);
             }
         }
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    import heapq
-
-    def prim_mst(adj, V):
-        pq = [(0, 0)] # (weight, vertex)
-        key = [float('inf')] * V
-        key[0] = 0
-        in_mst = [False] * V
-        mst_weight = 0
-
-        while pq:
-            weight, u = heapq.heappop(pq)
-            if in_mst[u]: continue
-            in_mst[u] = True
-            mst_weight += weight
-
-            for v, w in adj[u]:
-                if not in_mst[v] and w < key[v]:
-                    key[v] = w
-                    heapq.heappush(pq, (w, v))
-        return mst_weight
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    class PrimMST {
-        static class Node implements Comparable<Node> {
-            int vertex, weight;
-            Node(int v, int w) { vertex = v; weight = w; }
-            public int compareTo(Node n) { return this.weight - n.weight; }
-        }
-
-        static void primMST(List<List<Node>> adj, int V) {
-            PriorityQueue<Node> pq = new PriorityQueue<>();
-            int[] key = new int[V];
-            Arrays.fill(key, Integer.MAX_VALUE);
-            boolean[] inMST = new boolean[V];
-
-            pq.add(new Node(0, 0));
-            key[0] = 0;
-            int mst_weight = 0;
-
-            while (!pq.isEmpty()) {
-                Node u = pq.poll();
-                if (inMST[u.vertex]) continue;
-
-                inMST[u.vertex] = true;
-                mst_weight += u.weight;
-
-                for (Node neighbor : adj.get(u.vertex)) {
-                    int v = neighbor.vertex;
-                    int weight = neighbor.weight;
-
-                    if (!inMST[v] && weight < key[v]) {
-                        key[v] = weight;
-                        pq.add(new Node(v, key[v]));
-                    }
-                }
-            }
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 7. Dijkstra’s Algorithm
 
@@ -370,98 +183,41 @@ xychart-beta
     line "O(V^2)" [100, 2500, 10000, 250000, 1000000]
 ```
 
-### 7.4 Implementation
+### 7.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <bits/stdc++.h>
-    using namespace std;
+```text showLineNumbers
+Algorithm Dijkstra(G, w, s)
+// Single-Source Shortest Paths algorithm on weighted graph with non-negative weights
+// Input: Graph G = (V, E), non-negative weight function w, source vertex s
+// Output: Array dist[v] containing shortest path distance from s to each vertex v in V
+{
+    for each vertex v in V do
+    {
+        dist[v] <- infinity;
+        parent[v] <- NIL;
+    }
+    dist[s] <- 0;
+    S <- empty set;
+    Q <- V; // Priority queue of all vertices keyed by dist[v]
 
-    void dijkstra(vector<vector<pair<int, int>>>& adj, int V, int src) {
-        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-        vector<int> dist(V, INT_MAX);
-        pq.push({0, src});
-        dist[src] = 0;
+    while not EMPTY(Q) do
+    {
+        u <- ExtractMin(Q);
+        S <- S union {u};
 
-        while (!pq.empty()) {
-            int u = pq.top().second;
-            int d = pq.top().first;
-            pq.pop();
-
-            if (d > dist[u]) continue;
-
-            for (auto& neighbor : adj[u]) {
-                int v = neighbor.first;
-                int weight = neighbor.second;
-                if (dist[v] > dist[u] + weight) {
-                    dist[v] = dist[u] + weight;
-                    pq.push({dist[v], v});
-                }
+        for each vertex v in Adj[u] do
+        {
+            // Edge relaxation step
+            if (dist[u] + w(u, v) < dist[v]) then
+            {
+                dist[v] <- dist[u] + w(u, v);
+                parent[v] <- u;
+                DecreaseKey(Q, v, dist[v]);
             }
         }
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    import heapq
-
-    def dijkstra(adj, V, src):
-        pq = [(0, src)] # (distance, vertex)
-        dist = [float('inf')] * V
-        dist[src] = 0
-
-        while pq:
-            d, u = heapq.heappop(pq)
-            if d > dist[u]: continue
-
-            for v, weight in adj[u]:
-                if dist[v] > dist[u] + weight:
-                    dist[v] = dist[u] + weight
-                    heapq.heappush(pq, (dist[v], v))
-        return dist
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    class Dijkstra {
-        static class Node implements Comparable<Node> {
-            int vertex, distance;
-            Node(int v, int d) { vertex = v; distance = d; }
-            public int compareTo(Node n) { return this.distance - n.distance; }
-        }
-
-        static int[] dijkstra(List<List<Node>> adj, int V, int src) {
-            PriorityQueue<Node> pq = new PriorityQueue<>();
-            int[] dist = new int[V];
-            Arrays.fill(dist, Integer.MAX_VALUE);
-
-            pq.add(new Node(src, 0));
-            dist[src] = 0;
-
-            while (!pq.isEmpty()) {
-                Node u = pq.poll();
-                if (u.distance > dist[u.vertex]) continue;
-
-                for (Node neighbor : adj.get(u.vertex)) {
-                    int v = neighbor.vertex;
-                    int weight = neighbor.distance;
-
-                    if (dist[u.vertex] + weight < dist[v]) {
-                        dist[v] = dist[u.vertex] + weight;
-                        pq.add(new Node(v, dist[v]));
-                    }
-                }
-            }
-            return dist;
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 8. Fractional Knapsack Problem
 
@@ -490,94 +246,40 @@ xychart-beta
     line "O(n log n)" [33, 282, 664, 4482, 9965]
 ```
 
-### 8.4 Implementation
+### 8.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <bits/stdc++.h>
-    using namespace std;
+```text showLineNumbers
+Algorithm FractionalKnapsack(W, n, p, w)
+// Solves the Fractional Knapsack problem using a greedy approach
+// Input: Knapsack capacity W, number of items n, profits p[1..n], weights w[1..n]
+// Output: Array x[1..n] where x[i] is the fraction of item i included (0 <= x[i] <= 1)
+{
+    // Sort items in non-increasing order of value-to-weight ratio p[i]/w[i]
+    sort items such that p[1]/w[1] >= p[2]/w[2] >= ... >= p[n]/w[n];
 
-    struct Item { int value, weight; };
-    bool compare(Item a, Item b) {
-        double r1 = (double)a.value / a.weight;
-        double r2 = (double)b.value / b.weight;
-        return r1 > r2;
-    }
+    for i <- 1 to n do
+        x[i] <- 0.0;
 
-    double fractionalKnapsack(int W, Item arr[], int n) {
-        sort(arr, arr + n, compare);
-        double finalvalue = 0.0;
-        for (int i = 0; i < n; i++) {
-            if (arr[i].weight <= W) {
-                W -= arr[i].weight;
-                finalvalue += arr[i].value;
-            } else {
-                finalvalue += arr[i].value * ((double)W / arr[i].weight);
-                break;
-            }
+    remainingCapacity <- W;
+
+    for i <- 1 to n do
+    {
+        if (w[i] <= remainingCapacity) then
+        {
+            x[i] <- 1.0;
+            remainingCapacity <- remainingCapacity - w[i];
         }
-        return finalvalue;
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    class Item:
-        def __init__(self, value, weight):
-            self.value = value
-            self.weight = weight
-
-    def fractional_knapsack(W, arr):
-        arr.sort(key=lambda x: (x.value/x.weight), reverse=True)
-        final_value = 0.0
-        for item in arr:
-            if item.weight <= W:
-                W -= item.weight
-                final_value += item.value
-            else:
-                final_value += item.value * (W / item.weight)
-                break
-        return final_value
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    class FractionalKnapsack {
-        static class Item {
-            int value, weight;
-            Item(int v, int w) { value = v; weight = w; }
-        }
-
-        static double getMaxValue(int W, Item[] arr) {
-            Arrays.sort(arr, new Comparator<Item>() {
-                @Override
-                public int compare(Item item1, Item item2) {
-                    double cpr1 = (double)item1.value / item1.weight;
-                    double cpr2 = (double)item2.value / item2.weight;
-                    if (cpr1 < cpr2) return 1;
-                    else return -1;
-                }
-            });
-
-            double finalValue = 0.0;
-            for (Item item : arr) {
-                if (item.weight <= W) {
-                    W -= item.weight;
-                    finalValue += item.value;
-                } else {
-                    finalValue += item.value * ((double) W / item.weight);
-                    break;
-                }
-            }
-            return finalValue;
+        else
+        {
+            // Take fractional share of item i
+            x[i] <- remainingCapacity / w[i];
+            remainingCapacity <- 0;
+            break;
         }
     }
-    ```
-  </TabItem>
-</Tabs>
+    return x;
+}
+```
 
 ## 9. Activity Selection Problem
 
@@ -604,75 +306,29 @@ xychart-beta
     line "O(n log n)" [33, 282, 664, 4482, 9965]
 ```
 
-### 9.4 Implementation
+### 9.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <bits/stdc++.h>
-    using namespace std;
+```text showLineNumbers
+Algorithm ActivitySelection(s, f, n)
+// Selects a maximum-size set of mutually compatible activities
+// Input: Start times s[1..n] and finish times f[1..n] sorted such that f[1] <= f[2] <= ... <= f[n]
+// Output: Set A of selected mutually compatible activities
+{
+    A <- {1};  // Select the first activity
+    k <- 1;    // Index of the last activity selected
 
-    struct Activity { int start, finish; };
-    bool compare(Activity a, Activity b) { return a.finish < b.finish; }
-
-    void activitySelection(Activity arr[], int n) {
-        sort(arr, arr + n, compare);
-        int i = 0;
-        cout << "(" << arr[i].start << ", " << arr[i].finish << ")\n";
-        for (int j = 1; j < n; j++) {
-            if (arr[j].start >= arr[i].finish) {
-                cout << "(" << arr[j].start << ", " << arr[j].finish << ")\n";
-                i = j;
-            }
+    for m <- 2 to n do
+    {
+        // If start time of activity m is >= finish time of last selected activity
+        if (s[m] >= f[k]) then
+        {
+            A <- A union {m};
+            k <- m;
         }
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def activity_selection(activities):
-        activities.sort(key=lambda x: x[1])
-        i = 0
-        selected = [activities[i]]
-        for j in range(1, len(activities)):
-            if activities[j][0] >= activities[i][1]:
-                selected.append(activities[j])
-                i = j
-        return selected
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    class ActivitySelection {
-        static class Activity {
-            int start, finish;
-            Activity(int s, int f) { start = s; finish = f; }
-        }
-
-        static void printMaxActivities(Activity[] arr) {
-            Arrays.sort(arr, new Comparator<Activity>() {
-                @Override
-                public int compare(Activity a1, Activity a2) {
-                    return a1.finish - a2.finish;
-                }
-            });
-
-            int i = 0;
-            System.out.println("(" + arr[i].start + ", " + arr[i].finish + ")");
-
-            for (int j = 1; j < arr.length; j++) {
-                if (arr[j].start >= arr[i].finish) {
-                    System.out.println("(" + arr[j].start + ", " + arr[j].finish + ")");
-                    i = j;
-                }
-            }
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+    return A;
+}
+```
 
 ## 10. Huffman Codes
 
@@ -704,131 +360,26 @@ xychart-beta
     line "O(n log n)" [33, 282, 664, 4482, 9965]
 ```
 
-### 10.4 Implementation
+### 10.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <bits/stdc++.h>
-    using namespace std;
+```text showLineNumbers
+Algorithm Huffman(C)
+// Generates optimal prefix codes (Huffman tree) for characters in set C
+// Input: Set C of characters, where each c in C has frequency c.freq
+// Output: Root node of the optimal prefix tree
+{
+    n <- |C|;
+    Q <- C; // Initialize min-priority queue with all characters keyed by frequency
 
-    struct Node {
-        char data;
-        unsigned freq;
-        Node *left, *right;
-        Node(char data, unsigned freq) : data(data), freq(freq), left(NULL), right(NULL) {}
-    };
-
-    struct compare {
-        bool operator()(Node* l, Node* r) { return l->freq > r->freq; }
-    };
-
-    void printCodes(struct Node* root, string str) {
-        if (!root) return;
-        if (root->data != '$') cout << root->data << ": " << str << "\n";
-        printCodes(root->left, str + "0");
-        printCodes(root->right, str + "1");
+    for i <- 1 to n - 1 do
+    {
+        allocate new internal node z;
+        z.left <- x <- ExtractMin(Q);
+        z.right <- y <- ExtractMin(Q);
+        z.freq <- x.freq + y.freq;
+        Insert(Q, z);
     }
-
-    void HuffmanCodes(char data[], int freq[], int size) {
-        priority_queue<Node*, vector<Node*>, compare> minHeap;
-        for (int i = 0; i < size; ++i) minHeap.push(new Node(data[i], freq[i]));
-
-        while (minHeap.size() != 1) {
-            Node *left = minHeap.top(); minHeap.pop();
-            Node *right = minHeap.top(); minHeap.pop();
-            Node *top = new Node('$', left->freq + right->freq);
-            top->left = left;
-            top->right = right;
-            minHeap.push(top);
-        }
-        printCodes(minHeap.top(), "");
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    import heapq
-
-    class Node:
-        def __init__(self, freq, symbol, left=None, right=None):
-            self.freq = freq
-            self.symbol = symbol
-            self.left = left
-            self.right = right
-            self.huff = ''
-        def __lt__(self, nxt): return self.freq < nxt.freq
-
-    def print_nodes(node, val=''):
-        new_val = val + str(node.huff)
-        if node.left: print_nodes(node.left, new_val)
-        if node.right: print_nodes(node.right, new_val)
-        if not node.left and not node.right:
-            print(f"{node.symbol} -> {new_val}")
-
-    def huffman_coding(chars, freqs):
-        nodes = []
-        for x in range(len(chars)):
-            heapq.heappush(nodes, Node(freqs[x], chars[x]))
-        
-        while len(nodes) > 1:
-            left = heapq.heappop(nodes)
-            right = heapq.heappop(nodes)
-            left.huff = 0
-            right.huff = 1
-            newNode = Node(left.freq+right.freq, left.symbol+right.symbol, left, right)
-            heapq.heappush(nodes, newNode)
-            
-        print_nodes(nodes[0])
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    class Huffman {
-        static class Node implements Comparable<Node> {
-            int freq;
-            char c;
-            Node left, right;
-            public int compareTo(Node n) { return this.freq - n.freq; }
-        }
-
-        static void printCode(Node root, String s) {
-            if (root.left == null && root.right == null && Character.isLetter(root.c)) {
-                System.out.println(root.c + ":" + s);
-                return;
-            }
-            printCode(root.left, s + "0");
-            printCode(root.right, s + "1");
-        }
-
-        static void buildHuffmanTree(char[] charArray, int[] charFreq) {
-            PriorityQueue<Node> q = new PriorityQueue<>();
-            for (int i = 0; i < charArray.length; i++) {
-                Node n = new Node();
-                n.c = charArray[i];
-                n.freq = charFreq[i];
-                n.left = null;
-                n.right = null;
-                q.add(n);
-            }
-            Node root = null;
-            while (q.size() > 1) {
-                Node x = q.peek(); q.poll();
-                Node y = q.peek(); q.poll();
-                Node f = new Node();
-                f.freq = x.freq + y.freq;
-                f.c = '-';
-                f.left = x;
-                f.right = y;
-                root = f;
-                q.add(f);
-            }
-            printCode(root, "");
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+    return ExtractMin(Q); // Returns root of Huffman tree
+}
+```
 

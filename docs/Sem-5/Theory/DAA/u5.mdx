@@ -7,9 +7,6 @@ sidebar_position: 5
 ## Exploring Graphs
 :::
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 ## 1. Introduction to Graphs
 
 ### 1.1 Overview and Key Terminology
@@ -195,83 +192,37 @@ Tracing the 8-node graph shown above starting at node `1`:
   - **Adjacency Matrix**: $O(V^2)$ (scanning row for each vertex requires $O(V)$ operations).
 - **Space Complexity**: $O(V)$ auxiliary space for the recursion call stack and the `mark[]` array.
 
-### 4.5 Implementation
+### 4.5 Iterative DFS Algorithm (Using Stack)
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    using namespace std;
+```text showLineNumbers
+Algorithm IterativeDFS(s, G)
+// Traverses graph G starting from vertex s using an explicit stack
+// Input: Starting vertex s, graph G = (V, E)
+{
+    for each v in V do
+        visited[v] <- false;
 
-    void dfs(int v, const vector<vector<int>>& adj, vector<bool>& visited) {
-        visited[v] = true;
-        cout << v << " ";
+    S <- EMPTY_STACK();
+    PUSH(S, s);
 
-        for (int neighbor : adj[v]) {
-            if (!visited[neighbor]) {
-                dfs(neighbor, adj, visited);
+    while not EMPTY(S) do
+    {
+        u <- POP(S);
+        if not visited[u] then
+        {
+            visited[u] <- true;
+            visit(u); // Process vertex u
+
+            // Push all unvisited adjacent vertices onto stack
+            for each v in Adj[u] do
+            {
+                if not visited[v] then
+                    PUSH(S, v);
             }
         }
     }
-
-    void dfsearch(int n, const vector<vector<int>>& adj) {
-        vector<bool> visited(n + 1, false);
-        for (int v = 1; v <= n; v++) {
-            if (!visited[v]) {
-                dfs(v, adj, visited);
-            }
-        }
-        cout << "\n";
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def dfs(v, adj, visited):
-        visited[v] = True
-        print(v, end=" ")
-        for neighbor in adj[v]:
-            if not visited[neighbor]:
-                dfs(neighbor, adj, visited)
-
-    def dfsearch(num_nodes, adj):
-        visited = [False] * (num_nodes + 1)
-        for v in range(1, num_nodes + 1):
-            if not visited[v]:
-                dfs(v, adj, visited)
-        print()
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    public class DFSGraph {
-        public static void dfs(int v, List<List<Integer>> adj, boolean[] visited) {
-            visited[v] = true;
-            System.out.print(v + " ");
-
-            for (int neighbor : adj.get(v)) {
-                if (!visited[neighbor]) {
-                    dfs(neighbor, adj, visited);
-                }
-            }
-        }
-
-        public static void dfsearch(int n, List<List<Integer>> adj) {
-            boolean[] visited = new boolean[n + 1];
-            for (int v = 1; v <= n; v++) {
-                if (!visited[v]) {
-                    dfs(v, adj, visited);
-                }
-            }
-            System.out.println();
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 5. Breadth First Search (BFS)
 
@@ -334,106 +285,44 @@ Tracing BFS on the same 8-node graph starting from node `1`:
 - **Space Complexity**: $O(V)$ for the queue $Q$ and visited lookup array.
 - **Shortest Path Property**: In an unweighted graph, BFS is guaranteed to discover the shortest path (minimum edge count) from the start node to all other reachable nodes.
 
-### 5.5 Implementation
+### 5.5 Queue-Based BFS Traversal Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <queue>
-    using namespace std;
-
-    void bfs(int start, const vector<vector<int>>& adj, vector<bool>& visited) {
-        queue<int> q;
-        visited[start] = true;
-        q.push(start);
-
-        while (!q.empty()) {
-            int u = q.front();
-            q.pop();
-            cout << u << " ";
-
-            for (int w : adj[u]) {
-                if (!visited[w]) {
-                    visited[w] = true;
-                    q.push(w);
-                }
-            }
-        }
+```text showLineNumbers
+Algorithm BFS(s, G)
+// Explores graph G level-by-level starting from source vertex s
+// Input: Source vertex s, graph G = (V, E) represented by adjacency list Adj
+// Output: Shortest distance d[v] and predecessor parent[v] for all v in V
+{
+    for each u in V - {s} do
+    {
+        color[u] <- WHITE;
+        d[u] <- infinity;
+        parent[u] <- NIL;
     }
+    color[s] <- GRAY;
+    d[s] <- 0;
+    parent[s] <- NIL;
 
-    void search(int n, const vector<vector<int>>& adj) {
-        vector<bool> visited(n + 1, false);
-        for (int v = 1; v <= n; v++) {
-            if (!visited[v]) {
-                bfs(v, adj, visited);
+    Q <- EMPTY_QUEUE();
+    ENQUEUE(Q, s);
+
+    while not EMPTY(Q) do
+    {
+        u <- DEQUEUE(Q);
+        for each v in Adj[u] do
+        {
+            if (color[v] = WHITE) then
+            {
+                color[v] <- GRAY;
+                d[v] <- d[u] + 1;
+                parent[v] <- u;
+                ENQUEUE(Q, v);
             }
         }
-        cout << "\n";
+        color[u] <- BLACK;
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    from collections import deque
-
-    def bfs(start, adj, visited):
-        q = deque([start])
-        visited[start] = True
-
-        while q:
-            u = q.popleft()
-            print(u, end=" ")
-            for w in adj[u]:
-                if not visited[w]:
-                    visited[w] = True
-                    q.append(w)
-
-    def search(num_nodes, adj):
-        visited = [False] * (num_nodes + 1)
-        for v in range(1, num_nodes + 1):
-            if not visited[v]:
-                bfs(v, adj, visited)
-        print()
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    public class BFSGraph {
-        public static void bfs(int start, List<List<Integer>> adj, boolean[] visited) {
-            Queue<Integer> q = new LinkedList<>();
-            visited[start] = true;
-            q.add(start);
-
-            while (!q.isEmpty()) {
-                int u = q.poll();
-                System.out.print(u + " ");
-
-                for (int w : adj.get(u)) {
-                    if (!visited[w]) {
-                        visited[w] = true;
-                        q.add(w);
-                    }
-                }
-            }
-        }
-
-        public static void search(int n, List<List<Integer>> adj) {
-            boolean[] visited = new boolean[n + 1];
-            for (int v = 1; v <= n; v++) {
-                if (!visited[v]) {
-                    bfs(v, adj, visited);
-                }
-            }
-            System.out.println();
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 6. Graph Traversal Comparison: DFS vs BFS
 
@@ -587,104 +476,50 @@ flowchart LR
 - **Time Complexity**: $O(V + E)$ (calculating in-degrees takes $O(V + E)$ and each vertex/edge is processed once).
 - **Space Complexity**: $O(V)$ for the in-degree array, queue/stack, and output array.
 
-### 7.6 Implementation
+### 7.6 Kahn's Topological Sorting Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <queue>
-    using namespace std;
+```text showLineNumbers
+Algorithm KahnTopologicalSort(G)
+// Computes topological ordering of a Directed Acyclic Graph (DAG) using in-degrees
+// Input: Directed graph G = (V, E) represented by adjacency list Adj
+// Output: Array order containing topologically sorted vertices
+{
+    // Step 1: Compute in-degrees of all vertices
+    for each v in V do
+        inDegree[v] <- 0;
+    for each u in V do
+        for each v in Adj[u] do
+            inDegree[v] <- inDegree[v] + 1;
 
-    vector<int> topologicalSort(int V, const vector<vector<int>>& adj) {
-        vector<int> in_degree(V, 0);
-        for (int u = 0; u < V; u++) {
-            for (int v : adj[u]) {
-                in_degree[v]++;
-            }
+    // Step 2: Initialize queue with all vertices having in-degree 0
+    Q <- EMPTY_QUEUE();
+    for each v in V do
+        if (inDegree[v] = 0) then
+            ENQUEUE(Q, v);
+
+    count <- 0;
+
+    // Step 3: Process vertices
+    while not EMPTY(Q) do
+    {
+        u <- DEQUEUE(Q);
+        count <- count + 1;
+        order[count] <- u;
+
+        for each v in Adj[u] do
+        {
+            inDegree[v] <- inDegree[v] - 1;
+            if (inDegree[v] = 0) then
+                ENQUEUE(Q, v);
         }
+    }
 
-        queue<int> q;
-        for (int i = 0; i < V; i++) {
-            if (in_degree[i] == 0) q.push(i);
-        }
-
-        vector<int> order;
-        while (!q.empty()) {
-            int u = q.front();
-            q.pop();
-            order.push_back(u);
-
-            for (int v : adj[u]) {
-                if (--in_degree[v] == 0) {
-                    q.push(v);
-                }
-            }
-        }
+    if (count < |V|) then
+        print "Graph contains a directed cycle (Topological sort impossible)";
+    else
         return order;
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    from collections import deque
-
-    def topological_sort(V, adj):
-        in_degree = [0] * V
-        for u in range(V):
-            for v in adj[u]:
-                in_degree[v] += 1
-
-        q = deque([i for i in range(V) if in_degree[i] == 0])
-        order = []
-
-        while q:
-            u = q.popleft()
-            order.append(u)
-            for v in adj[u]:
-                in_degree[v] -= 1
-                if in_degree[v] == 0:
-                    q.append(v)
-
-        return order
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    public class TopologicalSort {
-        public static List<Integer> topoSort(int V, List<List<Integer>> adj) {
-            int[] inDegree = new int[V];
-            for (int u = 0; u < V; u++) {
-                for (int v : adj.get(u)) {
-                    inDegree[v]++;
-                }
-            }
-
-            Queue<Integer> q = new LinkedList<>();
-            for (int i = 0; i < V; i++) {
-                if (inDegree[i] == 0) q.add(i);
-            }
-
-            List<Integer> order = new ArrayList<>();
-            while (!q.isEmpty()) {
-                int u = q.poll();
-                order.add(u);
-
-                for (int v : adj.get(u)) {
-                    if (--inDegree[v] == 0) {
-                        q.add(v);
-                    }
-                }
-            }
-            return order;
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 8. Connected Components
 
@@ -724,92 +559,39 @@ Algorithms to compute SCCs in $O(V + E)$ time:
 - **Time Complexity**: $O(V + E)$
 - **Space Complexity**: $O(V)$
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    using namespace std;
+```text showLineNumbers
+Algorithm ConnectedComponents(G)
+// Finds and prints all connected components of an undirected graph G = (V, E)
+// Output: Prints each connected component with its member vertices
+{
+    for each v in V do
+        visited[v] <- false;
 
-    void dfsComponent(int u, const vector<vector<int>>& adj, vector<bool>& visited, vector<int>& comp) {
-        visited[u] = true;
-        comp.push_back(u);
-        for (int v : adj[u]) {
-            if (!visited[v]) {
-                dfsComponent(v, adj, visited, comp);
-            }
+    componentId <- 0;
+    for each v in V do
+    {
+        if (not visited[v]) then
+        {
+            componentId <- componentId + 1;
+            print "Component", componentId, ":";
+            DFSComponent(v, G);
+            print "\n";
         }
     }
+}
 
-    vector<vector<int>> findConnectedComponents(int V, const vector<vector<int>>& adj) {
-        vector<bool> visited(V, false);
-        vector<vector<int>> components;
-
-        for (int i = 0; i < V; i++) {
-            if (!visited[i]) {
-                vector<int> comp;
-                dfsComponent(i, adj, visited, comp);
-                components.push_back(comp);
-            }
-        }
-        return components;
+Algorithm DFSComponent(u, G)
+// Traverses and visits all vertices in the component reachable from u
+{
+    visited[u] <- true;
+    print u, " ";
+    for each v in Adj[u] do
+    {
+        if (not visited[v]) then
+            DFSComponent(v, G);
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def find_connected_components(V, adj):
-        visited = [False] * V
-        components = []
-
-        def dfs(u, comp):
-            visited[u] = True
-            comp.append(u)
-            for v in adj[u]:
-                if not visited[v]:
-                    dfs(v, comp)
-
-        for i in range(V):
-            if not visited[i]:
-                comp = []
-                dfs(i, comp)
-                components.append(comp)
-
-        return components
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    public class ConnectedComponents {
-        private static void dfs(int u, List<List<Integer>> adj, boolean[] visited, List<Integer> comp) {
-            visited[u] = true;
-            comp.add(u);
-            for (int v : adj.get(u)) {
-                if (!visited[v]) {
-                    dfs(v, adj, visited, comp);
-                }
-            }
-        }
-
-        public static List<List<Integer>> getComponents(int V, List<List<Integer>> adj) {
-            boolean[] visited = new boolean[V];
-            List<List<Integer>> components = new ArrayList<>();
-
-            for (int i = 0; i < V; i++) {
-                if (!visited[i]) {
-                    List<Integer> comp = new ArrayList<>();
-                    dfs(i, adj, visited, comp);
-                    components.add(comp);
-                }
-            }
-            return components;
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
 ## 9. Articulation Points (Cut Vertices)
 
@@ -883,154 +665,68 @@ graph TD
 - **Time Complexity**: $O(V + E)$ (a single DFS traversal).
 - **Space Complexity**: $O(V)$ auxiliary arrays for `disc[]`, `low[]`, `parent[]`, and recursion stack.
 
-### 9.5 Implementation
+### 9.5 Articulation Points Algorithm (Tarjan's DFS)
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <algorithm>
-    using namespace std;
+```text showLineNumbers
+Algorithm FindArticulationPoints(G)
+// Finds all articulation points (cut-vertices) in connected undirected graph G = (V, E)
+{
+    timer <- 0;
+    for each u in V do
+    {
+        visited[u] <- false;
+        disc[u] <- 0;
+        low[u] <- 0;
+        parent[u] <- NIL;
+        isAP[u] <- false;
+    }
 
-    void dfsAP(int u, int parent, int& timer, const vector<vector<int>>& adj,
-               vector<int>& disc, vector<int>& low, vector<bool>& isAP) {
-        disc[u] = low[u] = ++timer;
-        int children = 0;
+    for each u in V do
+        if (not visited[u]) then
+            AP_DFS(u);
 
-        for (int v : adj[u]) {
-            if (v == parent) continue;
+    for each u in V do
+        if (isAP[u] = true) then
+            print u, "is an Articulation Point";
+}
 
-            if (disc[v] != 0) {
-                // Back-edge
-                low[u] = min(low[u], disc[v]);
-            } else {
-                // Forward tree-edge
-                children++;
-                dfsAP(v, u, timer, adj, disc, low, isAP);
-                low[u] = min(low[u], low[v]);
+Algorithm AP_DFS(u)
+{
+    visited[u] <- true;
+    timer <- timer + 1;
+    disc[u] <- low[u] <- timer;
+    children <- 0;
 
-                if (parent != -1 && low[v] >= disc[u]) {
-                    isAP[u] = true;
-                }
-            }
+    for each v in Adj[u] do
+    {
+        if (v = parent[u]) then
+            continue;
+
+        if visited[v] then
+        {
+            // Back-edge found
+            low[u] <- min(low[u], disc[v]);
         }
+        else
+        {
+            // Forward tree-edge
+            children <- children + 1;
+            parent[v] <- u;
+            AP_DFS(v);
 
-        if (parent == -1 && children > 1) {
-            isAP[u] = true;
+            low[u] <- min(low[u], low[v]);
+
+            // Case 1: Non-root node with low[v] >= disc[u]
+            if (parent[u] != NIL and low[v] >= disc[u]) then
+                isAP[u] <- true;
         }
     }
 
-    vector<int> findArticulationPoints(int V, const vector<vector<int>>& adj) {
-        vector<int> disc(V + 1, 0), low(V + 1, 0);
-        vector<bool> isAP(V + 1, false);
-        int timer = 0;
-
-        for (int i = 1; i <= V; i++) {
-            if (disc[i] == 0) {
-                dfsAP(i, -1, timer, adj, disc, low, isAP);
-            }
-        }
-
-        vector<int> result;
-        for (int i = 1; i <= V; i++) {
-            if (isAP[i]) result.push_back(i);
-        }
-        return result;
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def find_articulation_points(V, adj):
-        disc = [0] * (V + 1)
-        low = [0] * (V + 1)
-        is_ap = [False] * (V + 1)
-        timer = 0
-
-        def dfs(u, parent):
-            nonlocal timer
-            timer += 1
-            disc[u] = low[u] = timer
-            children = 0
-
-            for v in adj[u]:
-                if v == parent:
-                    continue
-                if disc[v] != 0:
-                    low[u] = min(low[u], disc[v])
-                else:
-                    children += 1
-                    dfs(v, u)
-                    low[u] = min(low[u], low[v])
-                    if parent != -1 and low[v] >= disc[u]:
-                        is_ap[u] = True
-
-            if parent == -1 and children > 1:
-                is_ap[u] = True
-
-        for i in range(1, V + 1):
-            if disc[i] == 0:
-                dfs(i, -1)
-
-        return [i for i in range(1, V + 1) if is_ap[i]]
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
-
-    public class ArticulationPoints {
-        private static int timer;
-
-        private static void dfs(int u, int parent, List<List<Integer>> adj,
-                                int[] disc, int[] low, boolean[] isAP) {
-            disc[u] = low[u] = ++timer;
-            int children = 0;
-
-            for (int v : adj.get(u)) {
-                if (v == parent) continue;
-
-                if (disc[v] != 0) {
-                    low[u] = Math.min(low[u], disc[v]);
-                } else {
-                    children++;
-                    dfs(v, u, adj, disc, low, isAP);
-                    low[u] = Math.min(low[u], low[v]);
-
-                    if (parent != -1 && low[v] >= disc[u]) {
-                        isAP[u] = true;
-                    }
-                }
-            }
-
-            if (parent == -1 && children > 1) {
-                isAP[u] = true;
-            }
-        }
-
-        public static List<Integer> getArticulationPoints(int V, List<List<Integer>> adj) {
-            int[] disc = new int[V + 1];
-            int[] low = new int[V + 1];
-            boolean[] isAP = new boolean[V + 1];
-            timer = 0;
-
-            for (int i = 1; i <= V; i++) {
-                if (disc[i] == 0) {
-                    dfs(i, -1, adj, disc, low, isAP);
-                }
-            }
-
-            List<Integer> result = new ArrayList<>();
-            for (int i = 1; i <= V; i++) {
-                if (isAP[i]) result.add(i);
-            }
-            return result;
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+    // Case 2: Root of DFS tree has 2 or more children
+    if (parent[u] = NIL and children > 1) then
+        isAP[u] <- true;
+}
+```
 
 ## 10. Summary and Quick Revision Cheat Sheet
 

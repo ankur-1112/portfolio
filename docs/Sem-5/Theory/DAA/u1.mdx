@@ -65,6 +65,35 @@ sidebar_position: 1
 - While "schoolbook" multiplication is simple, the Karatsuba algorithm is a fundamental algorithm taught to improve it. It splits the $n$-digit numbers into halves and uses mathematical tricks to perform only three multiplications instead of four.
 - **Time Complexity**: $O(n^{\log_2 3}) \approx O(n^{1.585})$, making it faster than schoolbook multiplication for large integers.
 
+#### 5.3.1 Algorithm Pseudocode
+
+```text showLineNumbers
+Algorithm Karatsuba(X, Y, n)
+// Multiplies two n-digit numbers X and Y using divide and conquer
+// Input: Two n-digit integers X and Y, and their digit length n
+// Output: The product X * Y
+{
+    if (n = 1) then
+        return X * Y;
+
+    m <- ceil(n / 2);
+    // Split X and Y into two halves of size m:
+    // X = a * 10^m + b,  Y = c * 10^m + d
+    a <- floor(X / 10^m);
+    b <- X mod 10^m;
+    c <- floor(Y / 10^m);
+    d <- Y mod 10^m;
+
+    // Perform three recursive multiplications
+    p1 <- Karatsuba(a, c, m);
+    p2 <- Karatsuba(b, d, m);
+    p3 <- Karatsuba(a + b, c + d, m);
+
+    // Compute cross-term: a*d + b*c = p3 - p1 - p2
+    return p1 * 10^(2 * m) + (p3 - p1 - p2) * 10^m + p2;
+}
+```
+
 ## 6. Questions
 
 ### 6.1 Review Questions

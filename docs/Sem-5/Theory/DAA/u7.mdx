@@ -7,9 +7,6 @@ sidebar_position: 7
 ## String Matching & NP-Completeness
 :::
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
 ## 1. Introduction to String Matching
 
 ### 1.1 Problem Definition and Formal Model
@@ -391,254 +388,133 @@ for i = 1 to n do
 - **Total Time Complexity**: $\Theta(n + m)$
 - **Space Complexity**: $\Theta(m)$ for table $\pi$.
 
-## 6. Multi-Language Implementations for String Matching
+## 6. String Matching Algorithms (Formal Procedures)
 
-### 6.1 Naive String Matcher
+### 6.1 Naive String Matching Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <string>
-    using namespace std;
+```text showLineNumbers
+Algorithm NaiveStringMatcher(T, P)
+// Finds all occurrences of pattern P in text T by brute-force character checking
+// Input: Text string T of length n, pattern string P of length m (m <= n)
+// Output: Prints all valid shift positions s where P matches T[s+1 .. s+m]
+{
+    n <- length(T);
+    m <- length(P);
 
-    void naiveStringMatcher(const string& T, const string& P) {
-        int n = T.length();
-        int m = P.length();
-        for (int s = 0; s <= n - m; s++) {
-            int j = 0;
-            while (j < m && T[s + j] == P[j]) {
-                j++;
-            }
-            if (j == m) {
-                cout << "Pattern occurs with shift " << s << "\n";
-            }
-        }
+    for s <- 0 to n - m do
+    {
+        j <- 1;
+        while (j <= m and T[s + j] = P[j]) do
+            j <- j + 1;
+
+        if (j > m) then
+            print "Pattern occurs with shift", s;
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def naive_string_matcher(T, P):
-        n, m = len(T), len(P)
-        for s in range(n - m + 1):
-            if T[s : s + m] == P:
-                print(f"Pattern occurs with shift {s}")
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    public class NaiveStringMatcher {
-        public static void search(String T, String P) {
-            int n = T.length();
-            int m = P.length();
-            for (int s = 0; s <= n - m; s++) {
-                int j = 0;
-                while (j < m && T.charAt(s + j) == P.charAt(j)) {
-                    j++;
-                }
-                if (j == m) {
-                    System.out.println("Pattern occurs with shift " + s);
-                }
-            }
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
+}
+```
 
-### 6.2 Rabin-Karp Matcher
+### 6.2 Rabin-Karp Matching Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <string>
-    using namespace std;
+```text showLineNumbers
+Algorithm RabinKarpMatcher(T, P, d, q)
+// Finds occurrences of pattern P in text T using rolling hash fingerprints
+// Input: Text T of length n, pattern P of length m, radix d, prime modulus q
+// Output: Prints all valid shift positions where P occurs in T
+{
+    n <- length(T);
+    m <- length(P);
+    h <- (d^(m - 1)) mod q;
+    p <- 0;
+    t <- 0;
 
-    void rabinKarpMatcher(const string& T, const string& P, int d, int q) {
-        int n = T.length();
-        int m = P.length();
-        int h = 1;
-        for (int i = 0; i < m - 1; i++) h = (h * d) % q;
-
-        int p = 0, t = 0;
-        for (int i = 0; i < m; i++) {
-            p = (d * p + P[i]) % q;
-            t = (d * t + T[i]) % q;
-        }
-
-        for (int s = 0; s <= n - m; s++) {
-            if (p == t) {
-                if (T.substr(s, m) == P) {
-                    cout << "Pattern occurs with shift " << s << "\n";
-                }
-            }
-            if (s < n - m) {
-                t = (d * (t - T[s] * h) + T[s + m]) % q;
-                if (t < 0) t += q;
-            }
-        }
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def rabin_karp_matcher(T, P, d=256, q=101):
-        n, m = len(T), len(P)
-        h = pow(d, m - 1, q)
-        p, t = 0, 0
-
-        for i in range(m):
-            p = (d * p + ord(P[i])) % q
-            t = (d * t + ord(T[i])) % q
-
-        for s in range(n - m + 1):
-            if p == t:
-                if T[s : s + m] == P:
-                    print(f"Pattern occurs with shift {s}")
-            if s < n - m:
-                t = (d * (t - ord(T[s]) * h) + ord(T[s + m])) % q
-                t = (t + q) % q
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    public class RabinKarpMatcher {
-        public static void search(String T, String P, int d, int q) {
-            int n = T.length();
-            int m = P.length();
-            int h = 1;
-            for (int i = 0; i < m - 1; i++) h = (h * d) % q;
-
-            int p = 0, t = 0;
-            for (int i = 0; i < m; i++) {
-                p = (d * p + T.charAt(i)) % q;
-                t = (d * t + P.charAt(i)) % q;
-            }
-
-            for (int s = 0; s <= n - m; s++) {
-                if (p == t) {
-                    if (T.substring(s, s + m).equals(P)) {
-                        System.out.println("Pattern occurs with shift " + s);
-                    }
-                }
-                if (s < n - m) {
-                    t = (d * (t - T.charAt(s) * h) + T.charAt(s + m)) % q;
-                    if (t < 0) t += q;
-                }
-            }
-        }
-    }
-    ```
-  </TabItem>
-</Tabs>
-
-### 6.3 KMP Matcher
-
-<Tabs>
-  <TabItem value="cpp" label="C++">
-    ```cpp showLineNumbers
-    #include <iostream>
-    #include <vector>
-    #include <string>
-    using namespace std;
-
-    vector<int> computePrefixFunction(const string& P) {
-        int m = P.length();
-        vector<int> pi(m);
-        pi[0] = 0;
-        int k = 0;
-        for (int q = 1; q < m; q++) {
-            while (k > 0 && P[k] != P[q]) k = pi[k - 1];
-            if (P[k] == P[q]) k++;
-            pi[q] = k;
-        }
-        return pi;
+    // Preprocessing: compute hash value of P and first window of T
+    for i <- 1 to m do
+    {
+        p <- (d * p + P[i]) mod q;
+        t <- (d * t + T[i]) mod q;
     }
 
-    void kmpMatcher(const string& T, const string& P) {
-        int n = T.length(), m = P.length();
-        vector<int> pi = computePrefixFunction(P);
-        int q = 0;
-        for (int i = 0; i < n; i++) {
-            while (q > 0 && P[q] != T[i]) q = pi[q - 1];
-            if (P[q] == T[i]) q++;
-            if (q == m) {
-                cout << "Pattern occurs with shift " << i - m + 1 << "\n";
-                q = pi[q - 1];
+    // Matching: slide pattern over text
+    for s <- 0 to n - m do
+    {
+        if (p = t) then
+        {
+            // Verify character by character to eliminate spurious hits
+            match <- true;
+            for j <- 1 to m do
+            {
+                if (P[j] != T[s + j]) then
+                {
+                    match <- false;
+                    break;
+                }
             }
+            if match then
+                print "Pattern occurs with shift", s;
+        }
+
+        // Compute rolling hash for next window T[s+1 .. s+m]
+        if (s < n - m) then
+        {
+            t <- (d * (t - T[s + 1] * h) + T[s + m + 1]) mod q;
+            if (t < 0) then
+                t <- t + q;
         }
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def compute_prefix_function(P):
-        m = len(P)
-        pi = [0] * m
-        k = 0
-        for q in range(1, m):
-            while k > 0 and P[k] != P[q]:
-                k = pi[k - 1]
-            if P[k] == P[q]:
-                k += 1
-            pi[q] = k
-        return pi
+}
+```
 
-    def kmp_matcher(T, P):
-        n, m = len(T), len(P)
-        pi = compute_prefix_function(P)
-        q = 0
-        for i in range(n):
-            while q > 0 and P[q] != T[i]:
-                q = pi[q - 1]
-            if P[q] == T[i]:
-                q += 1
-            if q == m:
-                print(f"Pattern occurs with shift {i - m + 1}")
-                q = pi[q - 1]
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java" default>
-    ```java showLineNumbers
-    import java.util.*;
+### 6.3 Knuth-Morris-Pratt (KMP) Matching Algorithm
 
-    public class KMPMatcher {
-        public static int[] computePrefixFunction(String P) {
-            int m = P.length();
-            int[] pi = new int[m];
-            pi[0] = 0;
-            int k = 0;
-            for (int q = 1; q < m; q++) {
-                while (k > 0 && P.charAt(k) != P.charAt(q)) {
-                    k = pi[k - 1];
-                }
-                if (P.charAt(k) == P.charAt(q)) k++;
-                pi[q] = k;
-            }
-            return pi;
-        }
+```text showLineNumbers
+Algorithm KMPMatcher(T, P)
+// Finds all occurrences of pattern P in text T in linear time without backtracking
+// Input: Text string T of length n, pattern string P of length m
+// Output: Prints all valid shift positions where P occurs in T
+{
+    n <- length(T);
+    m <- length(P);
+    pi <- ComputePrefixFunction(P);
+    q <- 0; // Number of characters matched
 
-        public static void search(String T, String P) {
-            int n = T.length(), m = P.length();
-            int[] pi = computePrefixFunction(P);
-            int q = 0;
-            for (int i = 0; i < n; i++) {
-                while (q > 0 && P.charAt(q) != T.charAt(i)) {
-                    q = pi[q - 1];
-                }
-                if (P.charAt(q) == T.charAt(i)) q++;
-                if (q == m) {
-                    System.out.println("Pattern occurs with shift " + (i - m + 1));
-                    q = pi[q - 1];
-                }
-            }
+    for i <- 1 to n do
+    {
+        while (q > 0 and P[q + 1] != T[i]) do
+            q <- pi[q]; // Next character does not match, backtrack along pi
+
+        if (P[q + 1] = T[i]) then
+            q <- q + 1; // Next character matches
+
+        if (q = m) then
+        {
+            print "Pattern occurs with shift", i - m;
+            q <- pi[q]; // Look for next match
         }
     }
-    ```
-  </TabItem>
-</Tabs>
+}
+
+Algorithm ComputePrefixFunction(P)
+// Computes auxiliary prefix function pi for pattern P
+// Input: Pattern string P of length m
+// Output: Array pi[1..m] storing length of longest proper prefix of P[1..q] that is also a suffix
+{
+    m <- length(P);
+    pi[1] <- 0;
+    k <- 0;
+
+    for q <- 2 to m do
+    {
+        while (k > 0 and P[k + 1] != P[q]) do
+            k <- pi[k];
+
+        if (P[k + 1] = P[q]) then
+            k <- k + 1;
+
+        pi[q] <- k;
+    }
+    return pi;
+}
+```
 
 ## 7. Asymptotic Notation & Complexity Foundations
 

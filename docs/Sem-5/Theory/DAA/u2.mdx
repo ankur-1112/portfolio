@@ -6,8 +6,6 @@ sidebar_position: 2
 :::info[TITLE]
 ## Divide & Conquer Algorithms
 :::
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 ## 1. Introduction
 
@@ -149,49 +147,28 @@ xychart-beta
     line "O(log n)" [0, 3.3, 6.6, 9.9, 13.2, 16.6]
 ```
 
-### 9.4 Implementation
+### 9.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++" default>
-    ```cpp showLineNumbers
-    int binarySearch(int arr[], int left, int right, int x) {
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (arr[mid] == x) return mid;
-            if (arr[mid] < x) left = mid + 1;
-            else right = mid - 1;
-        }
-        return -1;
+```text showLineNumbers
+Algorithm BinarySearch(A, low, high, x)
+// Searches for element x in a sorted array A[low..high]
+// Input: Sorted array A, starting index low, ending index high, search key x
+// Output: Index of x if found, else -1
+{
+    while (low <= high) do
+    {
+        mid <- floor(low + (high - low) / 2);
+
+        if (A[mid] = x) then
+            return mid;                // Element found at index mid
+        else if (A[mid] < x) then
+            low <- mid + 1;            // Search right half
+        else
+            high <- mid - 1;           // Search left half
     }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def binary_search(arr, x):
-        left, right = 0, len(arr) - 1
-        while left <= right:
-            mid = left + (right - left) // 2
-            if arr[mid] == x: return mid
-            if arr[mid] < x: left = mid + 1
-            else: right = mid - 1
-        return -1
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java">
-    ```java showLineNumbers
-    int binarySearch(int arr[], int x) {
-        int left = 0, right = arr.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (arr[mid] == x) return mid;
-            if (arr[mid] < x) left = mid + 1;
-            else right = mid - 1;
-        }
-        return -1;
-    }
-    ```
-  </TabItem>
-</Tabs>
+    return -1;                         // Element not found
+}
+```
 
 ## 10. Merge Sort
 
@@ -221,103 +198,71 @@ xychart-beta
     line "O(n log n)" [0, 2, 4.7, 8, 11.6, 15.5, 19.6, 24]
 ```
 
-### 10.4 Implementation
+### 10.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++" default>
-    ```cpp showLineNumbers
-    void merge(int arr[], int l, int m, int r) {
-        int n1 = m - l + 1, n2 = r - m;
-        int L[n1], R[n2];
-        for (int i = 0; i < n1; i++) L[i] = arr[l + i];
-        for (int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
-        
-        int i = 0, j = 0, k = l;
-        while (i < n1 && j < n2) {
-            if (L[i] <= R[j]) arr[k++] = L[i++];
-            else arr[k++] = R[j++];
+```text showLineNumbers
+Algorithm MergeSort(A, low, high)
+// Sorts subarray A[low..high] using divide and conquer
+// Input: Array A, starting index low, ending index high
+// Output: Array A sorted in non-decreasing order
+{
+    if (low < high) then
+    {
+        mid <- floor(low + (high - low) / 2); // Divide
+        MergeSort(A, low, mid);               // Conquer left half
+        MergeSort(A, mid + 1, high);          // Conquer right half
+        Merge(A, low, mid, high);             // Combine sorted halves
+    }
+}
+
+Algorithm Merge(A, low, mid, high)
+// Merges two sorted subarrays A[low..mid] and A[mid+1..high] into A[low..high]
+{
+    n1 <- mid - low + 1;
+    n2 <- high - mid;
+
+    // Create temporary arrays L[1..n1] and R[1..n2]
+    for i <- 1 to n1 do
+        L[i] <- A[low + i - 1];
+    for j <- 1 to n2 do
+        R[j] <- A[mid + j];
+
+    i <- 1;
+    j <- 1;
+    k <- low;
+
+    while (i <= n1 and j <= n2) do
+    {
+        if (L[i] <= R[j]) then
+        {
+            A[k] <- L[i];
+            i <- i + 1;
         }
-        while (i < n1) arr[k++] = L[i++];
-        while (j < n2) arr[k++] = R[j++];
-    }
-
-    void mergeSort(int arr[], int l, int r) {
-        if (l >= r) return;
-        int m = l + (r - l) / 2;
-        mergeSort(arr, l, m);
-        mergeSort(arr, m + 1, r);
-        merge(arr, l, m, r);
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def merge_sort(arr):
-        if len(arr) > 1:
-            mid = len(arr) // 2
-            L = arr[:mid]
-            R = arr[mid:]
-
-            merge_sort(L)
-            merge_sort(R)
-
-            i = j = k = 0
-            while i < len(L) and j < len(R):
-                if L[i] <= R[j]:
-                    arr[k] = L[i]
-                    i += 1
-                else:
-                    arr[k] = R[j]
-                    j += 1
-                k += 1
-
-            while i < len(L):
-                arr[k] = L[i]
-                i += 1
-                k += 1
-
-            while j < len(R):
-                arr[k] = R[j]
-                j += 1
-                k += 1
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java">
-    ```java showLineNumbers
-    void merge(int arr[], int l, int m, int r) {
-        int n1 = m - l + 1;
-        int n2 = r - m;
-        int L[] = new int[n1];
-        int R[] = new int[n2];
-        for (int i = 0; i < n1; ++i) L[i] = arr[l + i];
-        for (int j = 0; j < n2; ++j) R[j] = arr[m + 1 + j];
-        
-        int i = 0, j = 0, k = l;
-        while (i < n1 && j < n2) {
-            if (L[i] <= R[j]) {
-                arr[k] = L[i];
-                i++;
-            } else {
-                arr[k] = R[j];
-                j++;
-            }
-            k++;
+        else
+        {
+            A[k] <- R[j];
+            j <- j + 1;
         }
-        while (i < n1) arr[k++] = L[i++];
-        while (j < n2) arr[k++] = R[j++];
+        k <- k + 1;
     }
 
-    void mergeSort(int arr[], int l, int r) {
-        if (l < r) {
-            int m = l + (r - l) / 2;
-            mergeSort(arr, l, m);
-            mergeSort(arr, m + 1, r);
-            merge(arr, l, m, r);
-        }
+    // Copy remaining elements of L[], if any
+    while (i <= n1) do
+    {
+        A[k] <- L[i];
+        i <- i + 1;
+        k <- k + 1;
     }
-    ```
-  </TabItem>
-</Tabs>
+
+    // Copy remaining elements of R[], if any
+    while (j <= n2) do
+    {
+        A[k] <- R[j];
+        j <- j + 1;
+        k <- k + 1;
+    }
+}
+```
 
 ## 11. Quick Sort
 
@@ -352,81 +297,41 @@ xychart-beta
     line "O(n^2) - Worst Case" [1, 4, 9, 16, 25, 36, 49, 64]
 ```
 
-### 11.4 Implementation
+### 11.4 Algorithm
 
-<Tabs>
-  <TabItem value="cpp" label="C++" default>
-    ```cpp showLineNumbers
-    int partition(int arr[], int low, int high) {
-        int pivot = arr[high];
-        int i = (low - 1);
-        for (int j = low; j <= high - 1; j++) {
-            if (arr[j] < pivot) {
-                i++;
-                std::swap(arr[i], arr[j]);
-            }
-        }
-        std::swap(arr[i + 1], arr[high]);
-        return (i + 1);
+```text showLineNumbers
+Algorithm QuickSort(A, low, high)
+// Sorts subarray A[low..high] using divide and conquer
+// Input: Array A, starting index low, ending index high
+// Output: Array A sorted in non-decreasing order
+{
+    if (low < high) then
+    {
+        pi <- Partition(A, low, high); // Partitioning index
+        QuickSort(A, low, pi - 1);     // Recursively sort elements before partition
+        QuickSort(A, pi + 1, high);    // Recursively sort elements after partition
     }
+}
 
-    void quickSort(int arr[], int low, int high) {
-        if (low < high) {
-            int pi = partition(arr, low, high);
-            quickSort(arr, low, pi - 1);
-            quickSort(arr, pi + 1, high);
-        }
-    }
-    ```
-  </TabItem>
-  <TabItem value="py" label="Python">
-    ```python showLineNumbers
-    def partition(arr, low, high):
-        pivot = arr[high]
-        i = low - 1
-        for j in range(low, high):
-            if arr[j] < pivot:
-                i += 1
-                arr[i], arr[j] = arr[j], arr[i]
-        arr[i + 1], arr[high] = arr[high], arr[i + 1]
-        return i + 1
+Algorithm Partition(A, low, high)
+// Partitions subarray A[low..high] around pivot element A[high]
+// Output: Final sorted position index of pivot
+{
+    pivot <- A[high];
+    i <- low - 1; // Index of smaller element
 
-    def quick_sort(arr, low, high):
-        if low < high:
-            pi = partition(arr, low, high)
-            quick_sort(arr, low, pi - 1)
-            quick_sort(arr, pi + 1, high)
-    ```
-  </TabItem>
-  <TabItem value="java" label="Java">
-    ```java showLineNumbers
-    int partition(int arr[], int low, int high) {
-        int pivot = arr[high];
-        int i = (low - 1);
-        for (int j = low; j < high; j++) {
-            if (arr[j] < pivot) {
-                i++;
-                int temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-        }
-        int temp = arr[i + 1];
-        arr[i + 1] = arr[high];
-        arr[high] = temp;
-        return i + 1;
-    }
-
-    void quickSort(int arr[], int low, int high) {
-        if (low < high) {
-            int pi = partition(arr, low, high);
-            quickSort(arr, low, pi - 1);
-            quickSort(arr, pi + 1, high);
+    for j <- low to high - 1 do
+    {
+        if (A[j] < pivot) then
+        {
+            i <- i + 1;
+            swap(A[i], A[j]);
         }
     }
-    ```
-  </TabItem>
-</Tabs>
+    swap(A[i + 1], A[high]);
+    return (i + 1);
+}
+```
 
 ## 12. Matrix Multiplication (Strassen's Algorithm)
 
