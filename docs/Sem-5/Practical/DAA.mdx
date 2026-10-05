@@ -136,15 +136,15 @@ class prime {
 
 ```mermaid
 flowchart TD
-    Start([Start]) --> Init[low = 0, high = n - 1]
-    Init --> CheckRange{low <= high ?}
-    CheckRange -- Yes --> CalcMid[mid = low + high / 2]
-    CalcMid --> CheckEqual{arr[mid] == key ?}
-    CheckEqual -- Yes --> Found[Output: Element found at mid] --> Stop([Stop])
-    CheckEqual -- No --> CheckLess{arr[mid] < key ?}
-    CheckLess -- Yes --> MoveRight[low = mid + 1] --> CheckRange
-    CheckLess -- No --> MoveLeft[high = mid - 1] --> CheckRange
-    CheckRange -- No --> InsertPos[Output: Element must be inserted at low] --> Stop
+    Start("[Start]") --> Init["low = 0, high = n - 1"]
+    Init --> CheckRange{"low <= high ?"}
+    CheckRange -- Yes --> CalcMid["mid = low + high / 2"]
+    CalcMid --> CheckEqual{"arr[mid] == key ?"}
+    CheckEqual -- Yes --> Found["Output: Element found at mid"] --> Stop("[Stop]")
+    CheckEqual -- No --> CheckLess{"arr[mid] < key ?"}
+    CheckLess -- Yes --> MoveRight["low = mid + 1"] --> CheckRange
+    CheckLess -- No --> MoveLeft["high = mid - 1"] --> CheckRange
+    CheckRange -- No --> InsertPos["Output: Element must be inserted at low"] --> Stop
 ```
 
 ### 2.3 Algorithm
@@ -258,9 +258,9 @@ class binary {
 
 ```mermaid
 flowchart LR
-    A[All set to 1] --> B[Left-to-Right: rating[i] > rating[i-1]]
-    B --> C[Right-to-Left: rating[i] > rating[i+1]]
-    C --> D[Sum Total Candies]
+    A["All set to 1"] --> B["Left-to-Right: rating[i] > rating[i-1]"]
+    B --> C["Right-to-Left: rating[i] > rating[i+1]"]
+    C --> D["Sum Total Candies"]
 ```
 
 ### 3.3 Algorithm
@@ -597,16 +597,16 @@ public class Main {
 
 ```mermaid
 flowchart TD
-    DFSNode[Visit Node u: disc=low=++timer] --> Neighbors[Explore Neighbor v]
-    Neighbors --> CheckParent{v == parent ?}
-    CheckParent -- Yes --> Ignore[Continue]
-    CheckParent -- No --> CheckVisited{visited v == true ?}
-    CheckVisited -- Yes --> BackEdge[low[u] = min low[u], disc[v]]
-    CheckVisited -- No --> TreeEdge[Recurse DFS v, u]
-    TreeEdge --> UpdateLow[low[u] = min low[u], low[v]]
-    UpdateLow --> BridgeCheck{low[v] > disc[u] ?}
-    BridgeCheck -- Yes --> AddBridge[Record u-v as Critical Bridge]
-    BridgeCheck -- No --> NoBridge[Not a bridge]
+    DFSNode["Visit Node u: disc=low=++timer"] --> Neighbors["Explore Neighbor v"]
+    Neighbors --> CheckParent{"v == parent ?"}
+    CheckParent -- Yes --> Ignore["Continue"]
+    CheckParent -- No --> CheckVisited{"visited v == true ?"}
+    CheckVisited -- Yes --> BackEdge["low[u] = min low[u], disc[v]"]
+    CheckVisited -- No --> TreeEdge["Recurse DFS v, u"]
+    TreeEdge --> UpdateLow["low[u] = min low[u], low[v]"]
+    UpdateLow --> BridgeCheck{"low[v] > disc[u] ?"}
+    BridgeCheck -- Yes --> AddBridge["Record u-v as Critical Bridge"]
+    BridgeCheck -- No --> NoBridge["Not a bridge"]
 ```
 
 ### 6.3 Algorithm
@@ -746,13 +746,13 @@ class Main {
 
 ```mermaid
 flowchart TD
-    Scan[Scan Grid Cell i, j] --> CheckLand{grid[i][j] == 1 and not visited ?}
-    CheckLand -- Yes --> Increment[Island Count++]
-    Increment --> DFS[DFS Flood Fill 8 directions]
-    DFS --> MarkVisited[Mark current cell visited]
-    MarkVisited --> ExploreNeighbors[Visit all 8 neighbors]
+    Scan["Scan Grid Cell i, j"] --> CheckLand{"grid[i][j] == 1 and not visited ?"}
+    CheckLand -- Yes --> Increment["Island Count++"]
+    Increment --> DFS["DFS Flood Fill 8 directions"]
+    DFS --> MarkVisited["Mark current cell visited"]
+    MarkVisited --> ExploreNeighbors["Visit all 8 neighbors"]
     ExploreNeighbors --> Scan
-    CheckLand -- No --> NextCell[Move to next cell] --> Scan
+    CheckLand -- No --> NextCell["Move to next cell"] --> Scan
 ```
 
 ### 7.3 Algorithm
@@ -1004,10 +1004,10 @@ public class Main {
 
 ```mermaid
 flowchart TD
-    Match{str1[i-1] == str2[j-1] ?}
-    Match -- Yes --> NoOp[dp[i][j] = dp[i-1][j-1]]
+    Match{"str1[i-1] == str2[j-1] ?"}
+    Match -- Yes --> NoOp["dp[i][j] = dp[i-1][j-1]"]
     Match -- No --> MinOp["dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])"]
-    NoOp --> Next[Fill Next Cell]
+    NoOp --> Next["Fill Next Cell"]
     MinOp --> Next
 ```
 
@@ -1118,10 +1118,10 @@ public class string {
 
 ```mermaid
 flowchart TD
-    Top[From Top: dp[i-1][j]] --> MinChoice{Take Min}
-    Left[From Left: dp[i][j-1]] --> MinChoice
-    MinChoice --> AddCurrent[Add grid[i][j]]
-    AddCurrent --> Stored[dp[i][j]]
+    Top["From Top: dp[i-1][j]"] --> MinChoice{Take Min}
+    Left["From Left: dp[i][j-1]"] --> MinChoice
+    MinChoice --> AddCurrent["Add grid[i][j]"]
+    AddCurrent --> Stored["dp[i][j]"]
 ```
 
 ### 10.3 Algorithm
@@ -1374,9 +1374,9 @@ public class RemoveKDigits {
 
 ```mermaid
 flowchart TD
-    Top[Paths from Top: dp[i-1][j]] --> Sum[Sum Pathways]
-    Left[Paths from Left: dp[i][j-1]] --> Sum
-    Sum --> Result[dp[i][j] = dp[i-1][j] + dp[i][j-1]]
+    Top["Paths from Top: dp[i-1][j]"] --> Sum["Sum Pathways"]
+    Left["Paths from Left: dp[i][j-1]"] --> Sum
+    Sum --> Result["dp[i][j] = dp[i-1][j] + dp[i][j-1]"]
 ```
 
 ### 12.3 Algorithm
@@ -1397,7 +1397,7 @@ import java.util.Scanner;
 
 public class UniquePaths { 
     public static int uniquePaths(int m, int n) { 
-        int[][] dp = new int[m][n]; 
+        int[][] dp = new int[m][n]; s
 
         for (int i = 0; i < m; i++) dp[i][0] = 1; 
 
