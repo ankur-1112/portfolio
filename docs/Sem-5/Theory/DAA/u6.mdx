@@ -132,12 +132,12 @@ On a $4 \times 4$ board, there are exactly **2 distinct valid solutions**:
 
 ```mermaid
 graph TD
-    subgraph Solution 1: "<2, 4, 1, 3>"
+    subgraph Sol1 ["Solution 1: <2, 4, 1, 3>"]
         R1C2["Row 1: Col 2"] --- R2C4["Row 2: Col 4"]
         R2C4 --- R3C1["Row 3: Col 1"]
         R3C1 --- R4C3["Row 4: Col 3"]
     end
-    subgraph Solution 2: "<3, 1, 4, 2>"
+    subgraph Sol2 ["Solution 2: <3, 1, 4, 2>"]
         S1C3["Row 1: Col 3"] --- S2C1["Row 2: Col 1"]
         S2C1 --- S3C4["Row 3: Col 4"]
         S3C4 --- S4C2["Row 4: Col 2"]
