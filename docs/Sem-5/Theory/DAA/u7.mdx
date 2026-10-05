@@ -302,14 +302,14 @@ The **Knuth-Morris-Pratt (KMP)** algorithm eliminates the need to backtrack the 
 ```mermaid
 flowchart TD
     Init["m = P.length, pi[1] = 0, k = 0"] --> Loop["for q = 2 to m"]
-    Loop --> WhileCond{k > 0 and P[k+1] != P[q]?}
+    Loop --> WhileCond{"k > 0 and P[k+1] != P[q]?"}
     WhileCond -- Yes --> Fallback["k = pi[k]"]
     Fallback --> WhileCond
-    WhileCond -- No --> MatchCond{P[k+1] == P[q]?}
+    WhileCond -- No --> MatchCond{"P[k+1] == P[q]?"}
     MatchCond -- Yes --> IncK["k = k + 1"]
     MatchCond -- No --> SetPi["pi[q] = k"]
     IncK --> SetPi
-    SetPi --> NextQ{q < m?}
+    SetPi --> NextQ{"q < m?"}
     NextQ -- Yes --> Loop
     NextQ -- No --> Return["return pi"]
 ```
