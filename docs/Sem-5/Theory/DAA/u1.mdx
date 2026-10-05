@@ -1,0 +1,102 @@
+---
+sidebar_position: 1
+---
+
+# Unit - 1
+:::info[TITLE]
+## Basics of Algorithms and Mathematics
+:::
+
+## 1. Introduction
+
+### 1.1 Overview
+- The course introduces the **Basics of Algorithms and Mathematics**, covering foundational concepts required for problem-solving using computers.
+{/* Note: Specific details for Introduction were not provided in the presentation slides. */}
+
+## 2. What is an Algorithm?
+
+### 2.1 Definition of an Algorithm
+- A **process or a set of rules** to be followed to achieve a desired output, especially by a computer.
+- A **step-by-step procedure** to solve different kinds of problems.
+- An **unambiguous (completely clear)** sequence of computational steps that transform the input into the output.
+- Any **well-defined computational procedure** that takes some value, or set of values, as input and produces some value, or set of values as output.
+
+## 3. Characteristics of an Algorithm
+
+### 3.1 Key Characteristics
+- **Finiteness**: An algorithm must always terminate after a finite number of steps.
+- **Definiteness**: Each step of an algorithm must be precisely defined.
+- **Input**: An algorithm has zero or more inputs.
+- **Output**: An algorithm must have at least one desirable output.
+- **Effectiveness**: All the operations to be performed in the algorithm must be sufficiently basic so that they can in principle be done exactly and in a finite length of time.
+
+## 4. Types of Algorithms
+
+### 4.1 Common Types Elaborated
+- **Simple recursive algorithms**: These algorithms solve a problem by calling themselves with smaller input values until a base case is reached.
+  - *Example*: Calculating Factorial, Fibonacci series.
+- **Backtracking algorithms**: A refined brute-force approach that tries to build a solution incrementally, abandoning paths ("backtracking") that fail to satisfy problem constraints.
+  - *Example*: N-Queens problem, Sudoku solver.
+- **Divide and conquer algorithms**: This paradigm involves dividing a problem into smaller, independent sub-problems, solving them recursively, and combining their results.
+  - *Example*: Merge Sort, Quick Sort.
+- **Dynamic programming algorithms**: These algorithms optimize recursive approaches by storing the results of overlapping subproblems (memoization/tabulation) so they are computed only once.
+  - *Example*: Longest Common Subsequence, Knapsack problem.
+- **Greedy algorithms**: This approach builds a solution piece by piece, always making a locally optimal choice with the hope that these choices lead to a global optimum.
+  - *Example*: Huffman Coding, Dijkstra's Shortest Path.
+- **Branch and bound algorithms**: Used primarily for optimization problems. It systematically explores candidate solutions using a state-space tree, pruning ("bounding") branches that cannot yield better solutions than the best one found so far.
+  - *Example*: Traveling Salesman Problem (TSP).
+- **Brute force algorithms**: A straightforward and exhaustive approach that enumerates all possible solutions and checks each one to see if it satisfies the problem statement.
+  - *Example*: Linear Search, Naive string matching.
+- **Randomized algorithms**: These use a degree of randomness as part of their logic to reduce time or space complexity on average.
+  - *Example*: Randomized Quick Sort, Monte Carlo algorithms.
+
+## 5. Simple Multiplication Methods
+
+### 5.1 Schoolbook (Grade-School) Multiplication
+- The traditional method where each digit of the multiplier is multiplied by every digit of the multiplicand. The resulting partial products are shifted and added together.
+- **Time Complexity**: $O(n^2)$ for two $n$-digit numbers (since it requires $n \times n$ single-digit multiplications).
+
+### 5.2 Repeated Addition
+- The most primitive form of multiplication where computing $A \times B$ is achieved by adding $A$ to itself $B$ times.
+- **Example**: $5 \times 3 = 5 + 5 + 5 = 15$.
+- **Time Complexity**: Highly inefficient for large numbers, taking $O(B)$ time.
+
+### 5.3 Karatsuba Algorithm (Divide & Conquer Approach)
+- While "schoolbook" multiplication is simple, the Karatsuba algorithm is a fundamental algorithm taught to improve it. It splits the $n$-digit numbers into halves and uses mathematical tricks to perform only three multiplications instead of four.
+- **Time Complexity**: $O(n^{\log_2 3}) \approx O(n^{1.585})$, making it faster than schoolbook multiplication for large integers.
+
+#### 5.3.1 Algorithm Pseudocode
+
+```text showLineNumbers
+Algorithm Karatsuba(X, Y, n)
+// Multiplies two n-digit numbers X and Y using divide and conquer
+// Input: Two n-digit integers X and Y, and their digit length n
+// Output: The product X * Y
+{
+    if (n = 1) then
+        return X * Y;
+
+    m <- ceil(n / 2);
+    // Split X and Y into two halves of size m:
+    // X = a * 10^m + b,  Y = c * 10^m + d
+    a <- floor(X / 10^m);
+    b <- X mod 10^m;
+    c <- floor(Y / 10^m);
+    d <- Y mod 10^m;
+
+    // Perform three recursive multiplications
+    p1 <- Karatsuba(a, c, m);
+    p2 <- Karatsuba(b, d, m);
+    p3 <- Karatsuba(a + b, c + d, m);
+
+    // Compute cross-term: a*d + b*c = p3 - p1 - p2
+    return p1 * 10^(2 * m) + (p3 - p1 - p2) * 10^m + p2;
+}
+```
+
+## 6. Questions
+
+### 6.1 Review Questions
+1. Define the term: Algorithm
+2. List types of algorithms.
+3. Discuss key characteristics of algorithm.

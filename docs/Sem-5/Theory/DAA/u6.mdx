@@ -1,0 +1,532 @@
+---
+sidebar_position: 6
+---
+
+# Unit - 6
+:::info[TITLE]
+## Backtracking & Branch and Bound
+:::
+
+## 1. Introduction to Backtracking
+
+### 1.1 Core Concept and Philosophy
+**Backtracking** is a systematic, general algorithmic technique that considers searching every possible combination in order to solve an optimization or constraint-satisfaction problem.
+- **Recursive Technique**: Builds candidates for solutions incrementally and abandons a candidate ("backtracks") as soon as it determines that the candidate cannot lead to a valid solution.
+- **Trial and Error**: If a sub-problem attempt fails to reach a feasible or optimal solution, we **undo** the preceding step (backtrack) and try an alternative branch.
+- **Search Strategy**: Traverses the **State Space Tree** in **Depth-First Search (DFS)** order.
+
+```mermaid
+flowchart TD
+    Start([Start]) --> Choose[Make a Choice]
+    Choose --> Valid{Is Choice Valid?}
+    Valid -- Yes --> Goal{Is Goal Reached?}
+    Goal -- Yes --> Success([Record Solution])
+    Goal -- No --> Recurse[Recurse to Next Sub-Problem]
+    Recurse --> Choose
+    Valid -- No --> Undo[Undo Choice / Backtrack]
+    Undo --> More{More Choices Left?}
+    More -- Yes --> Choose
+    More -- No --> DeadEnd([Return / Backtrack Further])
+```
+
+### 1.2 State Space Tree and DFS Traversal
+- **State Space Tree**: A tree representing all possible configurations (partial and complete candidate solutions) of the problem.
+  - **Root**: Initial state before making any choices.
+  - **Internal Nodes**: Partial solutions under construction.
+  - **Leaf Nodes**: Complete configurations (either valid solutions or dead-ends).
+  - **Live Node**: A node that has been generated and whose children have not yet been completely explored.
+  - **E-Node (Expansion Node)**: The live node currently being explored.
+  - **Dead Node**: A generated node that cannot be expanded further or has been pruned.
+
+### 1.3 Explicit vs. Implicit Constraints
+All constraint-satisfaction problems require two distinct categories of constraints:
+
+| Constraint Type | Definition | Example in N-Queens | Example in Knapsack |
+| :--- | :--- | :--- | :--- |
+| **Explicit Constraints** | Rules that restrict each vector component $x_i$ to take values strictly from a predefined domain $S_i$. Independent of other components. | $x_i \in \{1, 2, \dots, n\}$ (queen $i$ must be placed in a valid column). | $x_i \in \{0, 1\}$ (an item is either taken or left behind). |
+| **Implicit Constraints** | Relational criteria that determine whether the selected tuple satisfies the problem's objective and rules. Depends on interactions between components. | No two queens share the same row, column, or diagonal: $x_i \ne x_j$ and $\|x_i - x_j\| \ne \|i - j\|$. | Total weight cannot exceed capacity: $\sum w_i x_i \le W$. |
+
+### 1.4 General Backtracking Algorithm Schema
+
+```text showLineNumbers
+procedure backtrack(k)
+    for each element x[k] in Domain(k) do
+        if isValid(x[1..k]) then
+            if k == n then
+                write(x[1..n])  // Solution found
+            else
+                backtrack(k + 1)
+```
+
+## 2. The N-Queens Problem
+
+### 2.1 Problem Definition
+The **$N$-Queens Problem** consists of placing $N$ chess queens on an $N \times N$ chessboard such that **no two queens attack each other**.
+- In chess, a queen can move any number of squares horizontally, vertically, or diagonally.
+- Therefore, no two queens can share the **same row**, the **same column**, or the **same diagonal**.
+
+### 2.2 Attack Conditions and Conflict Formulas
+Let row indices be $i, k \in \{1, \dots, N\}$, and let $x[i]$ represent the column where the queen in row $i$ is placed:
+
+1. **Same Row Conflict**:
+   - Prevented inherently by placing exactly one queen per row (each row $i$ has exactly one $x[i]$).
+2. **Same Column Conflict**:
+   $$
+   x[i] = x[k]
+   $$
+3. **Same Diagonal Conflict**:
+   - **$45^\circ$ Diagonal** (slope $+1$): $Row - Col = \text{constant} \implies i - x[i] = k - x[k]$
+   - **$135^\circ$ Diagonal** (slope $-1$): $Row + Col = \text{constant} \implies i + x[i] = k + x[k]$
+   - **Unified Absolute Formula**:
+     $$
+     |x[i] - x[k]| = |i - k|
+     $$
+
+```mermaid
+graph LR
+    subgraph Row & Column Conflict
+        R1["Same Row: (r, c1) & (r, c2)"]
+        C1["Same Column: (r1, c) & (r2, c)"]
+    end
+    subgraph Diagonal Conflict
+        D1["45° Diagonal: Row - Col = C"]
+        D2["135° Diagonal: Row + Col = C"]
+        U1["Unified: |x[i] - x[k]| = |i - k|"]
+    end
+```
+
+### 2.3 $k$-Promising Solutions
+- **Definition**: A placement of $k$ queens ($1 \le k \le N$) in the first $k$ rows is called **$k$-promising** if none of the $k$ queens threaten each other.
+- An **$N$-promising** placement represents a complete, valid solution to the $N$-Queens problem.
+- A **$0$-promising** state is an invalid configuration where a conflict already exists, prompting immediate backtracking.
+
+### 2.4 Solutions Count Table for Different $N$
+
+| Number of Queens ($N$) | Board Size | Total Configurations ($N^N$) | Valid Solutions Count |
+| :---: | :---: | :---: | :---: |
+| **1** | $1 \times 1$ | 1 | **1** |
+| **2** | $2 \times 2$ | 4 | **0** |
+| **3** | $3 \times 3$ | 27 | **0** |
+| **4** | $4 \times 4$ | 256 | **2** |
+| **5** | $5 \times 5$ | 3,125 | **10** |
+| **6** | $6 \times 6$ | 46,656 | **4** |
+| **7** | $7 \times 7$ | 823,543 | **40** |
+| **8** | $8 \times 8$ | 16,777,216 | **92** |
+| **9** | $9 \times 9$ | $3.87 \times 10^8$ | **352** |
+| **10** | $10 \times 10$ | $10^{10}$ | **724** |
+
+## 3. The 4-Queens Problem Walkthrough
+
+### 3.1 $4 \times 4$ Chessboard Analysis
+On a $4 \times 4$ board, there are exactly **2 distinct valid solutions**:
+1. Solution 1: $\langle 2, 4, 1, 3 \rangle$
+   - Row 1 $\to$ Column 2
+   - Row 2 $\to$ Column 4
+   - Row 3 $\to$ Column 1
+   - Row 4 $\to$ Column 3
+2. Solution 2: $\langle 3, 1, 4, 2 \rangle$
+   - Row 1 $\to$ Column 3
+   - Row 2 $\to$ Column 1
+   - Row 3 $\to$ Column 4
+   - Row 4 $\to$ Column 2
+
+```mermaid
+graph TD
+    subgraph Sol1 ["Solution 1: <2, 4, 1, 3>"]
+        R1C2["Row 1: Col 2"] --- R2C4["Row 2: Col 4"]
+        R2C4 --- R3C1["Row 3: Col 1"]
+        R3C1 --- R4C3["Row 4: Col 3"]
+    end
+    subgraph Sol2 ["Solution 2: <3, 1, 4, 2>"]
+        S1C3["Row 1: Col 3"] --- S2C1["Row 2: Col 1"]
+        S2C1 --- S3C4["Row 3: Col 4"]
+        S3C4 --- S4C2["Row 4: Col 2"]
+    end
+```
+
+### 3.2 Promising States and Vector Representations
+Let us trace the derivation of $\langle 2, 4, 1, 3 \rangle$:
+- **1-Promising**: Place $Q_1$ at $(1, 2) \implies sol = [2, 0, 0, 0]$
+- **2-Promising**: Try row 2:
+  - $(2, 1) \implies$ diagonal conflict with $(1, 2)$ ($2-1 = 1 \ne 1-2$, but $|2-1| = |1-2| = 1$)
+  - $(2, 2) \implies$ same column conflict
+  - $(2, 3) \implies$ diagonal conflict ($|2-1| = |3-2| = 1$)
+  - $(2, 4) \implies$ **safe!** $\implies sol = [2, 4, 0, 0]$
+- **3-Promising**: Try row 3:
+  - $(3, 1) \implies$ **safe!** $\implies sol = [2, 4, 1, 0]$
+- **4-Promising**: Try row 4:
+  - $(4, 1) \implies$ col conflict
+  - $(4, 2) \implies$ col conflict
+  - $(4, 3) \implies$ **safe!** $\implies sol = [2, 4, 1, 3]$ (Valid Solution)
+
+### 3.3 State Space Tree Tracing
+The complete 4-Queens State Space Tree contains $4^4 = 256$ leaf nodes under brute force, but backtracking prunes most nodes early:
+- Placing $Q_1$ at column 1 leads to dead ends in row 3, forcing backtracks to try $Q_1$ at column 2.
+- The two branches that reach leaf level $k = 4$ are paths $2 \to 4 \to 1 \to 3$ and $3 \to 1 \to 4 \to 2$.
+
+## 4. N-Queens Algorithm and Implementation
+
+### 4.1 Recursive Queens Algorithm (Slide Pseudocode)
+
+```text showLineNumbers
+procedure queens(k, col, diag45, diag135)
+    {sol[1..k] is k-promising,
+     col = {sol[i] | 1 <= i <= k},
+     diag45 = {sol[i] - i + 1 | 1 <= i <= k}, and
+     diag135 = {sol[i] + i - 1 | 1 <= i <= k}}
+    if k = n then
+        write sol
+    else
+        for j <- 1 to n do
+            if j not in col and (j - k) not in diag45 and (j + k) not in diag135 then
+                sol[k + 1] <- j
+                queens(k + 1, col U {j}, diag45 U {j - k}, diag135 U {j + k})
+```
+
+### 4.2 Complexity Analysis
+- **Time Complexity**: Upper bounded by $O(N!)$. While a brute-force search evaluates $O(N^N)$ configurations, backtracking checks only permutations ($N!$) and aggressively prunes conflicting diagonal branches early.
+- **Space Complexity**: $O(N)$ auxiliary space for the recursive call stack and tracking arrays for columns and diagonals.
+
+### 4.3 Standard Backtracking Formulation (Place & NQueens Algorithm)
+
+```text showLineNumbers
+Algorithm Place(k, i)
+// Returns true if a queen can be placed in kth row and ith column.
+// Otherwise returns false. x[] is a global array whose first (k - 1)
+// values have been set. abs(r) returns the absolute value of r.
+{
+    for j <- 1 to k - 1 do
+    {
+        // Check for column conflict or diagonal conflict
+        if (x[j] = i or abs(x[j] - i) = abs(j - k)) then
+            return false;
+    }
+    return true;
+}
+
+Algorithm NQueens(k, n)
+// Using backtracking, this procedure prints all possible placements of
+// n queens on an n x n chessboard so that no two queens attack each other.
+{
+    for i <- 1 to n do
+    {
+        if Place(k, i) then
+        {
+            x[k] <- i;
+            if (k = n) then
+                write(x[1..n]);
+            else
+                NQueens(k + 1, n);
+        }
+    }
+}
+```
+
+## 5. Branch and Bound
+
+### 5.1 Concept and Comparison with Backtracking
+**Branch and Bound (B&B)** is an algorithmic paradigm primarily designed for **optimization problems** (minimization or maximization).
+
+| Feature | Backtracking | Branch and Bound |
+| :--- | :--- | :--- |
+| **Primary Goal** | Decision or constraint-satisfaction problems (find one or all valid solutions) | Optimization problems (find the best/optimal solution) |
+| **Search Traversal** | **Depth-First Search (DFS)** exclusively | **FIFO (BFS)**, **LIFO**, or **Least-Cost (LC-BB)** using a Priority Queue |
+| **Pruning Mechanism** | Bounding via explicit/implicit feasibility constraints | Pruning via **Bounding Functions** (upper/lower bounds compared against current best) |
+| **Efficiency** | Can spend time in unpromising deep subtrees | Prunes non-optimal subtrees earlier using mathematical bounds |
+
+### 5.2 Bounding Functions and Pruning Strategies
+At any node $x$ in the state space tree:
+- For **Minimization**: Compute a **Lower Bound** $\hat{c}(x)$. If $\hat{c}(x) \ge$ current best, prune node $x$.
+- For **Maximization**: Compute an **Upper Bound** $\hat{u}(x)$. If $\hat{u}(x) \le$ current best, prune node $x$.
+
+### 5.3 Depth-First Branch and Bound (DFBB) on N-Queens
+When using Depth-First Branch and Bound on $N$-Queens:
+- Nodes maintain a bound on maximum achievable non-attacking placements.
+- A path is immediately pruned whenever the number of remaining available rows is insufficient to beat the current best feasible solution.
+
+## 6. Knapsack Problem using Backtracking & Branch and Bound
+
+### 6.1 Problem Formulation
+We are given $n$ types of objects and a knapsack of capacity $W$:
+- Each item has weight $w_k$ and value $v_k$.
+- We may take an object or leave it behind, but we **cannot take a fraction** of an object.
+- **Goal**: Maximize total profit $\sum v_k x_k$ subject to $\sum w_k x_k \le W$.
+
+### 6.2 State Space Tree Representation
+- Each node in the tree is represented by the format:
+  $$
+  (\text{Selected Weights}; \text{Current Total Value})
+  $$
+- The left of the semicolon shows the weights of chosen items, and the right represents the accumulated value.
+- Exploration proceeds in depth-first order, updating the global best solution whenever an allowable load is reached.
+
+### 6.3 Step-by-Step Trace Example
+Given:
+- Weights: $w = (2, 3, 4, 5)$
+- Values: $v = (3, 5, 6, 10)$
+- Capacity: $W = 8$
+
+```mermaid
+graph TD
+    Root["; 0"] --> N2["2; 3"]
+    Root --> N3["3; 5"]
+    Root --> N4["4; 6"]
+    Root --> N5["5; 10"]
+
+    N2 --> N22["2,2; 6"]
+    N2 --> N23["2,3; 8"]
+    N2 --> N24["2,4; 9"]
+    N2 --> N25["2,5; 13"]
+
+    N3 --> N33["3,3; 10"]
+    N3 --> N34["3,4; 11"]
+    N3 --> N35["3,5; 15 (Optimal)"]
+
+    N4 --> N44["4,4; 12"]
+
+    style N35 fill:#51cf66,stroke:#2b8a3e,stroke-width:2px,color:#fff
+```
+
+- Level 1: Try starting with item of weight 2, 3, 4, or 5.
+- Combining items with weights $(3, 5)$:
+  - Total weight: $3 + 5 = 8 \le 8$
+  - Total value: $5 + 10 = 15$
+- Combining $(2, 2, 4) \implies$ weight 8, value $3 + 3 + 6 = 12$.
+- Combining $(2, 3, 3) \implies$ weight 8, value $3 + 5 + 5 = 13$.
+- **Optimal Load**: Items with weights $3$ and $5$, giving maximum total value = **15**.
+
+### 6.4 Recursive Algorithm Pseudocode (Slide Algorithm)
+
+```text showLineNumbers
+function backpack(i, r)
+    {Calculates the value of the best load that can
+     be constructed using items of type i to n and
+     whose total weight does not exceed r}
+    b <- 0
+    {Try each allowed kind of item in turn}
+    for k <- i to n do
+        if w[k] <= r then
+            b <- max(b, v[k] + backpack(k, r - w[k]))
+    return b
+```
+
+### 6.5 Backtracking 0/1 Knapsack Algorithm with Bounding Function
+
+```text showLineNumbers
+Algorithm BKnap(k, cp, cw)
+// Generates optimal solution for 0/1 Knapsack using Backtracking
+// cp is current profit; cw is current weight; k is current item index
+// w[i] and p[i] are weights and profits sorted such that p[i]/w[i] >= p[i+1]/w[i+1]
+// m is knapsack capacity; maxprofit is maximum profit found so far
+{
+    // Generate left child: Include item k
+    if (cw + w[k] <= m) then
+    {
+        y[k] <- 1;
+        if (k < n) then
+            BKnap(k + 1, cp + p[k], cw + w[k]);
+        if (cp + p[k] > maxprofit and k = n) then
+        {
+            maxprofit <- cp + p[k];
+            for j <- 1 to n do x[j] <- y[j];
+        }
+    }
+
+    // Generate right child: Exclude item k
+    if (Bound(cp, cw, k) > maxprofit) then
+    {
+        y[k] <- 0;
+        if (k < n) then
+            BKnap(k + 1, cp, cw);
+        if (cp > maxprofit and k = n) then
+        {
+            maxprofit <- cp;
+            for j <- 1 to n do x[j] <- y[j];
+        }
+    }
+}
+```
+
+## 7. Minimax Principle in Game Trees
+
+### 7.1 Concept and Zero-Sum Games
+The **Minimax Principle** is a decision rule used in two-player, zero-sum games of perfect information (such as Chess, Checkers, and Tic-Tac-Toe):
+- **Zero-Sum**: An advantage gained by one player represents an equivalent disadvantage to the other player.
+- **Two Players**:
+  - **MAX Player**: Strives to **maximize** their score (profit/gain).
+  - **MIN Player (Opponent)**: Strives to **minimize** the MAX player's score (minimizing loss).
+
+### 7.2 Decision Rule: Minimizing Maximum Loss
+Minimax ensures that a player chooses a strategy that **minimizes the maximum possible loss** (or maximizes the minimum possible gain) guaranteed against an optimal opponent.
+
+### 7.3 Working of the Minimax Algorithm
+1. The game state is modeled as a tree where levels alternate between **MAX turns** and **MIN turns**.
+2. Recursion proceeds down the tree to terminal leaf states (evaluated by a heuristic evaluation function).
+3. Evaluated leaf scores are backed up through the tree:
+   - At a **MIN node**: Value is the minimum of its children's scores:
+     $$
+     V(\text{node}) = \min_{c \in \text{children}} V(c)
+     $$
+   - At a **MAX node**: Value is the maximum of its children's scores:
+     $$
+     V(\text{node}) = \max_{c \in \text{children}} V(c)
+     $$
+
+```mermaid
+graph TD
+    Root["MAX (Player): 3"] --> Min1["MIN 1: min(3, 12, 8) = 3"]
+    Root --> Min2["MIN 2: min(2, 4, 6) = 2"]
+    Root --> Min3["MIN 3: min(14, 5, 2) = 2"]
+
+    Min1 --> L1["3"]
+    Min1 --> L2["12"]
+    Min1 --> L3["8"]
+
+    Min2 --> L4["2"]
+    Min2 --> L5["4"]
+    Min2 --> L6["6"]
+
+    Min3 --> L7["14"]
+    Min3 --> L8["5"]
+    Min3 --> L9["2"]
+
+    style Root fill:#ff922b,stroke:#d9480f,stroke-width:2px,color:#fff
+```
+
+### 7.4 Numerical Game Tree Walkthrough
+From the slide's game tree:
+- **Left Branch**: Leaves are $\{3, 12, 8\} \implies \text{MIN chooses } \min(3, 12, 8) = 3$.
+- **Middle Branch**: Leaves are $\{2, 4, 6\} \implies \text{MIN chooses } \min(2, 4, 6) = 2$.
+- **Right Branch**: Leaves are $\{14, 5, 2\} \implies \text{MIN chooses } \min(14, 5, 2) = 2$.
+- **Root (MAX)**: Evaluates the three choices $\{3, 2, 2\} \implies \max(3, 2, 2) = \mathbf{3}$.
+- The optimal move for MAX is the **left branch**, guaranteeing a payout of at least 3.
+
+### 7.5 Tic-Tac-Toe Game Tree Example
+Terminal utility payoffs:
+- $+10$: Player $X$ (MAX) wins.
+- $-10$: Player $O$ (MIN) wins.
+- $0$: Draw.
+
+By recursively evaluating possible remaining moves:
+- If a move leads directly to a board where $X$ completes 3-in-a-row $\implies +10$.
+- If $O$ can block or make a winning line $\implies -10$.
+- Backtracking propagates these outcomes so $X$ always selects the move maximizing guaranteed outcome.
+
+### 7.6 Minimax Decision Algorithm
+
+```text showLineNumbers
+Algorithm Minimax(node, depth, isMaximizingPlayer)
+// Recursively evaluates game tree to determine optimal value for current player
+// Input: node representing game state, current depth, boolean isMaximizingPlayer
+// Output: Evaluated optimal score for current game position
+{
+    if (depth = max_depth or is_terminal(node)) then
+        return evaluate(node);
+
+    if isMaximizingPlayer then
+    {
+        bestValue <- -infinity;
+        for each child in get_children(node) do
+        {
+            val <- Minimax(child, depth + 1, false);
+            bestValue <- max(bestValue, val);
+        }
+        return bestValue;
+    }
+    else
+    {
+        bestValue <- +infinity;
+        for each child in get_children(node) do
+        {
+            val <- Minimax(child, depth + 1, true);
+            bestValue <- min(bestValue, val);
+        }
+        return bestValue;
+    }
+}
+```
+
+## 8. Travelling Salesman Problem (TSP)
+
+### 8.1 Problem Statement and Graph Representation
+- Given a set of $n$ cities and the distance (cost) between every pair of vertices.
+- **Objective**: Find the **shortest possible route** (Hamiltonian cycle of minimum total weight) that visits every city **exactly once** and returns to the starting city.
+
+```mermaid
+graph LR
+    A((A)) --- B((B))
+    B((B)) --- C((C))
+    C((C)) --- A((A))
+    A((A)) --- D((D))
+    B((B)) --- D((D))
+    C((C)) --- D((D))
+```
+
+### 8.2 Backtracking Formulation
+- Generates permutations of tours starting at a designated city (e.g., city 1).
+- Maintains `current_cost` along the path.
+- **Pruning rule**: If `current_cost >= min_cost_so_far`, the branch is immediately abandoned.
+
+### 8.3 Branch and Bound Formulation (Reduced Cost Matrix)
+Using **Least Cost Branch and Bound (LCBB)**:
+1. **Reduce Matrix**: Subtract the minimum value from each row and column so that every row and column has at least one zero. The sum of subtracted amounts provides a **Lower Bound** on tour cost.
+2. For each possible next city, construct a child node, recalculate the reduced matrix cost, and select the child with the lowest bound.
+
+### 8.4 Complexity and NP-Hard Classification
+- **Classification**: **NP-hard** optimization problem.
+- **Brute Force Search**: $(n - 1)! / 2$ possible tours $\implies O(n!)$ time.
+- **Branch and Bound**: Prunes significant portions of the state space tree, though worst-case remains exponential.
+
+### 8.5 TSP Backtracking Algorithm
+
+```text showLineNumbers
+Algorithm TSPBacktrack(currCity, count, cost, start)
+// Solves Travelling Salesperson Problem using backtracking with cost bounding
+// graph[1..n, 1..n] is adjacency cost matrix; visited[1..n] tracks visited cities
+// minCost stores the minimum Hamiltonian tour cost found so far
+{
+    if (count = n and graph[currCity, start] > 0) then
+    {
+        minCost <- min(minCost, cost + graph[currCity, start]);
+        return;
+    }
+
+    for nextCity <- 1 to n do
+    {
+        if (not visited[nextCity] and graph[currCity, nextCity] > 0) then
+        {
+            // Prune if current accumulated cost already exceeds best found tour
+            if (cost + graph[currCity, nextCity] < minCost) then
+            {
+                visited[nextCity] <- true;
+                TSPBacktrack(nextCity, count + 1, cost + graph[currCity, nextCity], start);
+                visited[nextCity] <- false; // Backtrack
+            }
+        }
+    }
+}
+```
+
+## 9. Summary and Quick Revision Cheat Sheet
+
+### 9.1 Comparison of Core Problem Paradigms
+
+| Problem / Technique | Primary Paradigm | State Space Exploration | Key Bounding / Pruning Criteria | Worst-Case Time |
+| :--- | :--- | :--- | :--- | :---: |
+| **N-Queens** | Backtracking | Depth-First Search (DFS) | Row, Column, and Diagonal non-attack conditions | $O(N!)$ |
+| **Knapsack (B&B)** | Branch & Bound / Backtracking | Depth-First / Best-First | Exceeding capacity $W$ or upper bound on fractional profit | $O(2^n)$ |
+| **Minimax** | Game Tree Search | Depth-First (Adversarial) | Zero-sum terminal evaluation, min-max score backup | $O(b^m)$ |
+| **TSP** | Branch & Bound / Backtracking | Least Cost / DFS | Cost matrix reduction bounds or current best tour cost | $O(n!)$ |
+
+### 9.2 Formula & Constraint Reference Card
+- **Diagonal Attack Formula**: Two queens at $(i, x[i])$ and $(k, x[k])$ attack each other diagonally if and only if:
+  $$
+  |x[i] - x[k]| = |i - k|
+  $$
+- **Minimax Decision**:
+  $$
+  V(\text{MAX}) = \max(V(\text{children})), \quad V(\text{MIN}) = \min(V(\text{children}))
+  $$
+- **Constraints**:
+  - Explicit: domain-level restriction on individual variable ($x_i \in S_i$).
+  - Implicit: relational restriction among multiple variables ($f(x_1, \dots, x_n) \le C$).
