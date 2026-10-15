@@ -1,5 +1,13 @@
 ---
+title: Unit - 3
 sidebar_position: 3
+description: Understand mobile application security fundamentals, OWASP Mobile Top 10 vulnerabilities, runtime risks, insecure storage, and key defenses.
+keywords:
+  - owasp mobile top 10
+  - mobile app security
+  - insecure data storage
+  - mobile vulnerability
+  - app permissions
 ---
 
 # Unit - 3
@@ -114,7 +122,7 @@ Codesigning is a digital signature technology applied to a compiled application 
 ### 4.2 The Codesigning Process
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Generate CA Certificate] --> B[Hash the App Code]
     B --> C[Encrypt Hash with Private Key]
     C --> D[Distribute Signed Package]
